@@ -31,3 +31,5 @@ terraform/.terraform.lock.hcl
 .DS_Store
 terraform/.terraform.lock.hcl
 terraform/.terraform.lock.hcl
+.terraform.lock.hcl
+terraform/.terraform.lock.hcl

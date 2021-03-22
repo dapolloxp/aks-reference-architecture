@@ -51,7 +51,7 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
   dns_prefix          = "dapolina"
  # node_resource_group = "${var.prefix}-nodes-rg"
   
-  kubernetes_version  = "${var.kubernetes_version}"
+  kubernetes_version  = var.kubernetes_version
   identity            {
     type = "UserAssigned"
     user_assigned_identity_id = azurerm_user_assigned_identity.aks_master_identity.id
@@ -90,9 +90,9 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
 
   network_profile  {
     network_plugin = "azure"
-    service_cidr = "${var.service_cidr}"
-    dns_service_ip = "${var.dns_service_ip}"
-    docker_bridge_cidr = "${var.docker_bridge_cidr}"
+    service_cidr = var.service_cidr
+    dns_service_ip = var.dns_service_ip
+    docker_bridge_cidr = var.docker_bridge_cidr
     load_balancer_sku = "standard"
     outbound_type = "userDefinedRouting"
     #outbound_type = "${var.outboundtype}"
@@ -101,7 +101,7 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
   
   default_node_pool {
     name                  = "defaultpool"
-    vm_size               = "${var.machine_type}"
+    vm_size               = var.machine_type
     node_count            = var.default_node_pool_size
     vnet_subnet_id        = var.aks_spoke_subnet_id
   }
