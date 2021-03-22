@@ -20,14 +20,14 @@ variable "spoke_vnet_addr_prefix" {}
 
 # Azure Spring Cloud Variables
 
-variable "springboot-service-subnet-name" {}
-variable "springboot-service-subnet-addr" {}
-variable "springboot-apps-subnet-name" {}
-variable "springboot-apps-subnet-addr" {}
-variable "springboot-data-subnet-name" {}
-variable "springboot-data-subnet-addr" {}
-variable "springboot-support-subnet-addr" {}
-variable "springboot-support-subnet-name" {}
+variable "aks-service-subnet-name" {}
+variable "aks-service-subnet-addr" {}
+variable "aks-apps-subnet-name" {}
+variable "aks-apps-subnet-addr" {}
+variable "aks-data-subnet-name" {}
+variable "aks-data-subnet-addr" {}
+variable "aks-support-subnet-addr" {}
+variable "aks-support-subnet-name" {}
 variable "service_principal_resource_provider_display_name" {
   type    = string
   default = "Azure Spring Cloud Resource Provider"

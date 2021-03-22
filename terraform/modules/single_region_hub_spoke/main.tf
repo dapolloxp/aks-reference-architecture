@@ -24,35 +24,37 @@ resource "azurerm_virtual_network" "spoke" {
 
 # Spring Cloud Service Subnet
 resource "azurerm_subnet" "azuresbcloudsvc" {
-  name                 = var.springboot-service-subnet-name
+  name                 = var.aks-service-subnet-name
   resource_group_name = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
-  address_prefixes       = [var.springboot-service-subnet-addr]
+  address_prefixes       = [var.aks-service-subnet-addr]
+  enforce_private_link_endpoint_network_policies = true
 }
 
 # Spring Cloud Apps Subnet
 resource "azurerm_subnet" "azuresbcloudapps" {
-  name                 = var.springboot-apps-subnet-name
+  name                 = var.aks-apps-subnet-name
   resource_group_name = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
-  address_prefixes       = [var.springboot-apps-subnet-addr]
+  address_prefixes       = [var.aks-apps-subnet-addr]
+  enforce_private_link_endpoint_network_policies = true
 }
 
 # Data Services Subnet
 resource "azurerm_subnet" "azuresbclouddata" {
-  name                 = var.springboot-data-subnet-name
+  name                 = var.aks-data-subnet-name
   resource_group_name = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
-  address_prefixes       = [var.springboot-data-subnet-addr]
+  address_prefixes       = [var.aks-data-subnet-addr]
   enforce_private_link_endpoint_network_policies = true
 }
 
 # Supported Services Subnet, e.g. keyvault
 resource "azurerm_subnet" "azuresbcloudsupport" {
-  name                 = var.springboot-support-subnet-name
+  name                 = var.aks-support-subnet-name
   resource_group_name = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.spoke.name
-  address_prefixes       = [var.springboot-support-subnet-addr]
+  address_prefixes       = [var.aks-support-subnet-addr]
   enforce_private_link_endpoint_network_policies = true
 }
 

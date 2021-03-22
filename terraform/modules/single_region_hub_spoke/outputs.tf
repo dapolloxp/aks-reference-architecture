@@ -23,6 +23,11 @@ output "spoke_vnet_id" {
     value           = azurerm_virtual_network.spoke.id
 }
 
+output "aks_spoke_subnet_id" {
+    description     = "Spoke AKS Subnet 1"
+    value           = azurerm_subnet.azuresbcloudapps.id
+}
+
 output "spoke_address_space" { 
     description     = "Spoke Address Space"
     value           = azurerm_virtual_network.spoke.address_space

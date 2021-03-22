@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = ">= 2.42"
+      version = ">= 2.52"
     }
   }
 }
@@ -16,6 +16,12 @@ provider "azurerm" {
 # Resource group 
 resource "azurerm_resource_group" "sc_corp_rg" {
     name                        = var.resource_group_name
+    location                    = var.location
+
+}
+
+resource "azurerm_resource_group" "aks_rg" {
+    name                        = var.aks_resource_group_name
     location                    = var.location
 
 }
@@ -32,7 +38,7 @@ module "log_analytics" {
   location                        = var.location
   law_name               = "${var.law_prefix}-${random_string.random.result}"
 }
-
+/*
 module "spring_cloud" {
   source                          = "./modules/azure_spring_cloud"
   resource_group_name             = azurerm_resource_group.sc_corp_rg.name
@@ -49,7 +55,9 @@ module "spring_cloud" {
   sc_default_apps_route           = module.hub_spoke.sc_default_apps_route
   sc_default_runtime_route        = module.hub_spoke.sc_default_runtime_route
 }
+*/
 
+/*
 module "my_sql" {
   source                          = "./modules/my_sql"
   resource_group_name             = azurerm_resource_group.sc_corp_rg.name
@@ -61,7 +69,7 @@ module "my_sql" {
   hub_virtual_network_id          = module.hub_spoke.hub_vnet_id
   spoke_virtual_network_id        = module.hub_spoke.spoke_vnet_id
 }
-
+*/
 module "keyvault" {
   source                          = "./modules/key_vault"
 
@@ -71,6 +79,15 @@ module "keyvault" {
     sc_support_subnetid             = module.hub_spoke.sc_support_subnetid
     hub_virtual_network_id          = module.hub_spoke.hub_vnet_id
     spoke_virtual_network_id        = module.hub_spoke.spoke_vnet_id
+}
+
+module "aks" {
+  source                          = "./modules/aks"
+  resource_group_name             = azurerm_resource_group.aks_rg.name
+  location                        = var.location  
+  aks_spoke_subnet_id             = module.hub_spoke.aks_spoke_subnet_id
+  hub_virtual_network_id          = module.hub_spoke.hub_vnet_id
+  spoke_virtual_network_id        = module.hub_spoke.spoke_vnet_id
 }
 
 # Hub-Spoke VNET, Azure Bastion, Azure Firewall Using DNS Proxy
@@ -83,14 +100,14 @@ module "hub_spoke" {
     hub_vnet_addr_prefix            = var.hub_vnet_addr_prefix
     spoke_vnet_name                 = var.spoke_vnet_name
     spoke_vnet_addr_prefix          = var.spoke_vnet_addr_prefix
-    springboot-service-subnet-name  = var.springboot-service-subnet-name
-    springboot-service-subnet-addr  = var.springboot-service-subnet-addr
-    springboot-apps-subnet-name     = var.springboot-apps-subnet-name
-    springboot-apps-subnet-addr     = var.springboot-apps-subnet-addr
-    springboot-data-subnet-name     = var.springboot-data-subnet-name
-    springboot-data-subnet-addr     = var.springboot-data-subnet-addr
-    springboot-support-subnet-addr  = var.springboot-support-subnet-addr
-    springboot-support-subnet-name  = var.springboot-support-subnet-name
+    aks-service-subnet-name         = var.aks-service-subnet-name
+    aks-service-subnet-addr         = var.aks-service-subnet-addr
+    aks-apps-subnet-name            = var.aks-apps-subnet-name
+    aks-apps-subnet-addr            = var.aks-apps-subnet-addr
+    aks-data-subnet-name            = var.aks-data-subnet-name
+    aks-data-subnet-addr            = var.aks-data-subnet-addr
+    aks-support-subnet-addr         = var.aks-support-subnet-addr
+    aks-support-subnet-name         = var.aks-support-subnet-name
     appgw-subnet-name               = var.appgw-subnet-name
     appgw-subnet-addr               = var.appgw-subnet-addr
     azurefw_name                    = "${var.azurefw_name}-${random_string.random.result}"

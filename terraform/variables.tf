@@ -6,7 +6,15 @@ variable "resource_group_name" {
 variable "location" {
     type = string
     default = "East US"
-} 
+}
+
+variable "aks_resource_group_name" {
+    type        = string 
+    description = "AKS RG"
+    default     = "aks-rg"
+}
+
+
 
 # mysql module
 
@@ -67,7 +75,7 @@ variable "spoke_vnet_name" {
 }
 variable "spoke_vnet_addr_prefix" {
     type        = string 
-    description = "Spoke VNET prefix"
+    description = "AKS VNET prefix"
     default     = "10.1.0.0/16"
 }
 variable "azurefw_name" {
@@ -95,47 +103,47 @@ variable "appgw-subnet-addr" {
 
 # Azure Spring Cloud Variables
 
-variable "springboot-service-subnet-name" {
+variable "aks-service-subnet-name" {
     type        = string
     description = "Spring Cloud Service Subnet"
-    default     = "snet-runtime"
+    default     = "snet-aks01"
 }
-variable "springboot-service-subnet-addr" {
+variable "aks-service-subnet-addr" {
     type        = string
     description = "Spring Cloud CIDR Subnet"
     default     = "10.1.0.0/24"
 }
-variable "springboot-apps-subnet-name" {
+variable "aks-apps-subnet-name" {
     type        = string
     description = "Spring Cloud Service Subnet"
-    default     = "snet-app"
+    default     = "snet-aks02"
 }
-variable "springboot-apps-subnet-addr" {
+variable "aks-apps-subnet-addr" {
     type        = string
     description = "Spring Cloud CIDR Subnet"
     default     = "10.1.1.0/24"
 }
 
-variable "springboot-data-subnet-name" {
+variable "aks-data-subnet-name" {
     type        = string
     description = "Spring Cloud Data Services Subnet"
     default     = "snet-data"
 }
-variable "springboot-data-subnet-addr" {
+variable "aks-data-subnet-addr" {
     type        = string
     description = "Spring Cloud Data Services Subnet"
     default     = "10.1.3.0/24"
 }
 
-variable "springboot-support-subnet-addr" {
+variable "aks-support-subnet-addr" {
     type        = string
-    description = "Spring Cloud Private Link Subnet"
+    description = "aks Cloud Private Link Subnet"
     default     = "10.1.2.0/24"
 }
 
-variable "springboot-support-subnet-name" {
+variable "aks-support-subnet-name" {
     type        = string
-    description = "Spring Cloud Private Link Subnet Name"
+    description = "aks Cloud Private Link Subnet Name"
     default     = "snet-support"
 }
 
