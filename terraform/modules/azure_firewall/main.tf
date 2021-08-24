@@ -378,7 +378,9 @@ resource "azurerm_firewall_application_rule_collection" "AKS_acs_rules" {
     target_fqdns = [      
        
        "acs-mirror.azureedge.net",
-       "*.docker.io"
+       "*.docker.io",
+       "production.cloudflare.docker.com",
+       "*.azurecr.io"
     ]
 
     protocol {

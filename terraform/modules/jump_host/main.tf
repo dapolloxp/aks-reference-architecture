@@ -37,38 +37,45 @@ resource "azurerm_subnet_network_security_group_association" "jumphost_nsg_assoc
 
 # Virtual Machine for jump_host 
 
-resource "azurerm_virtual_machine" "jump_host" {
+resource "azurerm_linux_virtual_machine" "jump_host" {
   name                  = var.jump_host_name
   location              = var.location
   resource_group_name   = var.resource_group_name
   network_interface_ids = [
         azurerm_network_interface.jump_host.id
     ]
-  vm_size               = var.jump_host_vm_size
- 
+  size               = var.jump_host_vm_size
+  /*
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
     sku       = "2019-Datacenter"
     version   = "latest"
- }
+ }*/
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
  
-  storage_os_disk {
+  os_disk {
     name              = "${var.jump_host_name}-os-disk"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
+    caching           = "ReadWrite"  
+    storage_account_type = "Standard_LRS"
   }
  
-  os_profile {
-    computer_name      = var.jump_host_name
-    admin_username     = var.jump_host_admin_username
-    admin_password     = var.jump_host_password
+  identity {
+    type = "SystemAssigned"
   }
+  computer_name      = var.jump_host_name
+  admin_username     = var.jump_host_admin_username
+  admin_password     = var.jump_host_password
+  disable_password_authentication = false
  
-  os_profile_windows_config {
-    provision_vm_agent = true
-  }
+  
+  provision_vm_agent = true
+  
  
 
   timeouts {
@@ -76,28 +83,57 @@ resource "azurerm_virtual_machine" "jump_host" {
       delete = "2h"
   }
 }
- 
+
 resource "azurerm_virtual_machine_extension" "Installdependancies" {
-    name                    = "${var.jump_host_name}-vmext"
-    virtual_machine_id = azurerm_virtual_machine.jump_host.id
-    publisher            = "Microsoft.Compute"
-    type                 = "CustomScriptExtension"
-    type_handler_version = "1.9"
- 
-  protected_settings = <<PROTECTED_SETTINGS
+    name                        = "${var.jump_host_name}_vm_extension"
+    virtual_machine_id          = azurerm_linux_virtual_machine.jump_host.id
+    publisher                   = "Microsoft.Azure.Extensions"
+    type                        = "CustomScript"
+    type_handler_version        = "2.0"
+
+    settings = <<SETTINGS
     {
-      "commandToExecute": "powershell.exe -Command \"./DeployDeveloperConfig.ps1; exit 0;\""
+        "script":"${filebase64("${path.module}/tools_install.sh")}"
     }
-  PROTECTED_SETTINGS
- 
-  settings = <<SETTINGS
-    {
-        "fileUris": [
-           "https://raw.githubusercontent.com/Azure/azure-spring-cloud-reference-architecture/main/terraform/modules/jump_host/DeployDeveloperConfig.ps1",
-           "https://raw.githubusercontent.com/Azure/azure-spring-cloud-reference-architecture/main/petclinic/deployPetClinicApp.ps1"
-           ]
-    }
-SETTINGS
+    SETTINGS
+    depends_on = [
+      azurerm_key_vault_access_policy.vm_key_access
+    ]
 
 }
+
+
+ data "azurerm_client_config" "current" {}
+ data "azurerm_subscription" "sub" {
+}
+
+ resource "azurerm_role_assignment" "vm_reader" {
+  scope                = data.azurerm_subscription.sub.id
+  //scope                  = tostring(join("",[data.azurerm_subscription.sub.id, "/ResourceGroups/",var.kv_rg]))
+  role_definition_name = "Reader"
+  principal_id         = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
+  depends_on = [
+    azurerm_linux_virtual_machine.jump_host,
+    azurerm_key_vault_access_policy.vm_key_access
+  ]
+}
  
+ resource "azurerm_key_vault_access_policy" "vm_key_access" {
+  key_vault_id = var.key_vault_id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
+  //object_id = data.azurerm_client_config.current.object_id
+  //application_id = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
+  key_permissions = [
+    "Get",
+    "Create"
+  ]
+
+  secret_permissions = [
+    "Get",
+    "Set"
+  ]
+  depends_on = [
+    azurerm_linux_virtual_machine.jump_host
+  ]
+}

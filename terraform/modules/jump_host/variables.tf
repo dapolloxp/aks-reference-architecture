@@ -6,6 +6,10 @@ variable "tags" {
         Environment = "development"
     }
 }
+variable "kv_rg" {
+    sensitive   = true
+    type        = string 
+}
 
 variable "jump_host_name" {}
 
@@ -20,3 +24,5 @@ variable "jump_host_vm_size" {}
 variable "jump_host_admin_username" {}
 
 variable "jump_host_password" {}
+
+variable "key_vault_id" {}

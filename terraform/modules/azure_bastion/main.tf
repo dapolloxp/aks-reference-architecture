@@ -4,6 +4,7 @@ resource "azurerm_subnet" "azure_bastion" {
     resource_group_name         = var.resource_group_name
     virtual_network_name        = var.azurebastion_vnet_name
     address_prefixes            = [var.azurebastion_addr_prefix]
+    
 } 
 
 resource "azurerm_public_ip" "azure_bastion" { 

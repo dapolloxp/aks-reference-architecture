@@ -11,6 +11,12 @@ variable "service_cidr" {
   description = "Service CIDR"
   default = "10.211.0.0/16"
 }
+
+variable "acr_id" {
+  
+}
+
+variable "key_vault_id" {}
 variable "dns_service_ip" {
   description = "dns_service_ip"
   default = "10.211.0.10"
@@ -27,5 +33,14 @@ variable "default_node_pool_size" {
 
 variable "kubernetes_version" {
     description = "The Kubernetes version to use for the cluster."
-    default =  "1.18.10"
+    default =  "1.20.5"
+}
+
+variable "aks_cluster_name" {
+    description = "AKS Cluster name"
+    default = "test-cluster"
+}
+variable "aks_dns_prefix" {
+    description = "AKS Prefix Name"
+    default = "dapolina"
 }

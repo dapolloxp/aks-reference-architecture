@@ -1,11 +1,11 @@
 variable "resource_group_name" {
     type        = string 
     description = "Core Infrastructure Resource Group"
-    default     = "sc-corp-rg"
+    default     = "aks-hub-rg"
 }
 variable "location" {
     type = string
-    default = "East US"
+    default = "eastus2"
 }
 
 variable "aks_resource_group_name" {
