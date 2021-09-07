@@ -90,6 +90,37 @@ module "hub_region1_default_subnet"{
   azure_fw_ip = module.azure_firewall_region1.ip
 }
 
+resource "azurerm_ip_group" "ip_g_region1_hub" {
+  name                = "region1-hub-ipgroup"
+  location            = azurerm_resource_group.hub_region1.location
+  resource_group_name = azurerm_resource_group.hub_region1.name
+  cidrs = ["10.1.0.0/16"]
+
+}
+
+resource "azurerm_ip_group" "ip_g_region1_aks_spoke" {
+  name                = "region1-aks-spoke-ipgroup"
+  location            = azurerm_resource_group.hub_region1.location
+  resource_group_name = azurerm_resource_group.hub_region1.name
+  cidrs = ["10.3.0.0/16"]
+}
+
+resource "azurerm_ip_group" "ip_g_region1_pe_spoke" {
+  name                = "region1-pe-spoke-ipgroup"
+  location            = azurerm_resource_group.hub_region1.location
+  resource_group_name = azurerm_resource_group.hub_region1.name
+  cidrs = ["10.4.0.0/16"]
+}
+
+resource "azurerm_ip_group" "ip_g_region2" {
+  name                = "region2-ipgroup"
+  location            = azurerm_resource_group.hub_region2.location
+  resource_group_name = azurerm_resource_group.hub_region2.name
+
+  cidrs = ["10.2.0.0/16", "10.10.0.0/16"]
+
+}
+
 module "hub_region2" {
   
   source = "../../modules/networking/vnet"
@@ -203,24 +234,6 @@ module "id_spk_region1_default_subnet" {
   subnet_prefixes = ["10.3.4.0/22"]
   azure_fw_ip = module.azure_firewall_region1.ip
 }
-/*
-data "azurerm_virtual_network" "vnetexample" {
-  #type                 = "Microsoft.Network/virtualNetworks"
-  name = module.id_spk_region1.vnet_name
-  resource_group_name  = module.id_spk_region1.vnet_rg
-  
-  depends_on = [
-    module.id_spk_region1
-  ]
-}
-*/
-
-
-/*
-resource "azurerm_subnet_route_table_association" "route_associations" {
-  subnet_id      = module.id_spk_region1.default_subnet_id
-  route_table_id = azurerm_route_table.default_aks_route.id
-}*/
 
 
 
@@ -333,8 +346,8 @@ module "acr" {
   source = "../../modules/acr"
   resource_group_name             = azurerm_resource_group.aks_rg.name
   location                        = var.location
-  //subnet_id                       = module.id_spk_region1_default_subnet.subnet_id
-  subnet_id                       = module.id_pe_region1_default_subnet.subnet_id
+  subnet_id                       = module.id_spk_region1_default_subnet.subnet_id
+  //subnet_id                       = module.id_pe_region1_default_subnet.subnet_id
   acr_name                        = var.acr_name
   acr_private_zone_id             = module.private_dns.acr_private_zone_id
 
@@ -403,6 +416,7 @@ module "azure_firewall_region1" {
     azurefw_vnet_name           = module.hub_region1.vnet_name
     azurefw_addr_prefix         = var.azurefw_addr_prefix_r1
     sc_law_id                   = module.log_analytics.log_analytics_id
+    region1_aks_spk_ip_g_id    = azurerm_ip_group.ip_g_region1_aks_spoke.id
 }
 
 # Jump host  Errors on creation with VMExtention is commented out
