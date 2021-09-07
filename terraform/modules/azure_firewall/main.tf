@@ -14,6 +14,11 @@ resource "azurerm_public_ip" "azure_firewall" {
     sku                         = "Standard"
 }
 
+resource "azurerm_firewall_policy" "base_policy" {
+  name                = "base_policy"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+}
 
 
 resource "azurerm_firewall" "azure_firewall_instance" { 
