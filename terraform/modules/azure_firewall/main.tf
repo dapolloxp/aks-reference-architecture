@@ -18,6 +18,9 @@ resource "azurerm_firewall_policy" "base_policy" {
   name                = "base_policy"
   resource_group_name = var.resource_group_name
   location            = var.location
+  dns {
+    proxy_enabled = true
+  }
 }
 
 
@@ -82,6 +85,44 @@ resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
   }
 
 }
+
+resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
+  name               = "aks-fwpolicy-rcg"
+  firewall_policy_id = azurerm_firewall_policy.base_policy.id
+  priority           = 100
+  application_rule_collection {
+    name     = "app_rule_collection1"
+    priority = 200
+    action   = "Allow"
+
+    rule {
+      name = "aks_service_tag"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      //source_ip_groups = [region1_aks_spk_ip_g_id]
+      source_addresses  = ["10.0.0.1"]
+      destination_fqdn_tags = ["AzureKubernetesService"]
+    }
+  }
+
+  network_rule_collection {
+    name     = "aks_network_rule_collection"
+    priority = 100
+    action   = "Allow"
+
+    rule {
+      name                  = "aks_global_network_rules"
+      protocols             = ["TCP"]
+      //source_ip_groups = [region1_aks_spk_ip_g_id]
+      source_addresses  = ["10.0.0.1"]
+      destination_fqdns = ["AzureCloud"]
+      destination_ports     = ["443", "9000"]
+    }
+  }
+}
+
 
 resource "azurerm_firewall_network_rule_collection" "private_aks" {
     name                = "PrivateAKSNetworkRules"
