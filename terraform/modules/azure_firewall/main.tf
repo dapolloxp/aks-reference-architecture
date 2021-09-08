@@ -91,7 +91,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
   firewall_policy_id = azurerm_firewall_policy.base_policy.id
   priority           = 100
   application_rule_collection {
-    name     = "app_rule_collection1"
+    name     = "aks_app_rule_collection"
     priority = 200
     action   = "Allow"
 
@@ -101,8 +101,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]
-      //source_addresses  = ["10.0.0.1"]
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
   }
@@ -113,12 +112,19 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
     action   = "Allow"
 
     rule {
-      name                  = "aks_global_network_rules"
+      name                  = "aks_global_network_rule"
       protocols             = ["TCP"]
-      //source_ip_groups = [region1_aks_spk_ip_g_id]
-      source_addresses  = ["10.0.0.1"]
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
       destination_fqdns = ["AzureCloud"]
       destination_ports     = ["443", "9000"]
+    }
+
+    rule {
+      name                  = "aks_ntp_network_rule"
+      protocols             = ["UDP"]
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_addresses = ["*"]
+      destination_ports     = ["123"]
     }
   }
 }
