@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "= 2.63"
+      version = "2.63"
     }
   }
 }
@@ -323,7 +323,7 @@ module "peering_id_spk_Region2_2" {
 
   depends_on = [module.peering_id_spk_Region2_1]
 }
-/*
+
 module "aks" {
   source                          = "../../modules/aks"
   resource_group_name             = azurerm_resource_group.aks_rg.name
@@ -339,7 +339,7 @@ module "aks" {
   key_vault_id                    = module.hub_keyvault.kv_key_zone_id
   
 }
-*/
+
 
 
 module "acr" {
