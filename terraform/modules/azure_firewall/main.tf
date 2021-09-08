@@ -104,6 +104,17 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       source_ip_groups = [var.region1_aks_spk_ip_g_id]      
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
+
+    rule {
+      name = "ubuntu_libraries"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["api.snapcraft.io","motd.ubuntu.com",]
+    }
+
   }
 
   network_rule_collection {
