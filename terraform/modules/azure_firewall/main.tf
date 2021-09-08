@@ -115,6 +115,61 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       destination_fqdns = ["api.snapcraft.io","motd.ubuntu.com",]
     }
 
+    rule {
+      name = "microsoft_crls"
+      protocols {
+        type = "Http"
+        port = 80
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["crl.microsoft.com",
+                          "mscrl.microsoft.com",  
+                          "crl3.digicert.com",
+                          "ocsp.digicert.com"]
+    }
+
+    rule {
+      name = "github_rules"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["github.com"]
+    }
+
+    rule {
+      name = "microsoft_metrics_rules"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["*.prod.microsoftmetrics.com"]
+    }
+
+    rule {
+      name = "aks_acs_rules"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["acs-mirror.azureedge.net",
+                           "*.docker.io",
+                           "production.cloudflare.docker.com",
+                          "*.azurecr.io"]
+    }
+
+    rule {
+      name = "microsoft_login_rules"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["login.microsoftonline.com"]
+    }
   }
 
   network_rule_collection {
@@ -136,345 +191,6 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       source_ip_groups = [var.region1_aks_spk_ip_g_id]      
       destination_addresses = ["*"]
       destination_ports     = ["123"]
-    }
-  }
-}
-
-
-resource "azurerm_firewall_network_rule_collection" "private_aks" {
-    name                = "PrivateAKSNetworkRules"
-    azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-    resource_group_name = var.resource_group_name
-    priority            = 100
-    action              = "Allow"
-    rule { 
-        name = "NTP"
-        source_addresses  = [ 
-            "*" 
-        ]
-        destination_addresses = [
-            "*"
-        ]
-        destination_ports = [ 
-            "123" 
-        ]
-        protocols = [ 
-            "UDP" 
-        ]
-    }
-}
-
-resource "azurerm_firewall_application_rule_collection" "private_aks" { 
-    name                = "PrivateAKSAppRules"
-    azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-    resource_group_name = var.resource_group_name
-    priority            = 100
-    action              = "Allow"
-    rule {
-        name = "AKSService_FQDNTag"
-        source_addresses = [ 
-            "*" 
-        ]
-        fqdn_tags = [ 
-            "AzureKubernetesService" 
-        ]
-    }
-}
-
-resource "azurerm_firewall_network_rule_collection" "spring_cloud_tcp" {
-  name                = "spring_cloud_network_tcp_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 300
-  action              = "Allow"
-
-  rule {
-    name = "AzureSpringCloudStorageNetwork"
-
-    source_addresses = [
-      "*",
-    ]
-
-    destination_ports = [  
-      "445",  
-    ]
-
-    destination_addresses = [
-      "Storage",
-    ]
-
-    protocols = [
-      "TCP",
-    ]
-  }
-
-  rule {
-    name = "AzureGlobalRequiredNetwork_UDP"
-
-    source_addresses = [
-      "*",
-    ]
-
-    destination_ports = [
-      "1194",
-      "53",  
-    ]
-
-    destination_addresses = [
-      "AzureCloud.EastUS",
-      "AzureCloud.EastUS2"
-    ]
-
-    protocols = [
-      "UDP",
-    ]
-  }
-  
-}
-
-resource "azurerm_firewall_network_rule_collection" "aks_netrules_tcp" {
-  name                = "AKS_network_tcp_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 150
-  action              = "Allow"
-
-  rule {
-    name = "AzureGlobalRequiredNetwork_TCP"
-
-    source_addresses = [
-      "*",
-    ]
-
-    destination_ports = [
-      "9000",
-      "443",  
-    ]
-
-    destination_addresses = [
-      "AzureCloud.eastus2",
-      "AzureCloud.eastus",
-    ]
-
-    protocols = [
-      "TCP",
-    ]
-  }
-  
-}
-
-resource "azurerm_firewall_application_rule_collection" "ubuntu_libs" {
-  name                = "ubuntu_libaries_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 350
-  action              = "Allow"
-
-  rule {
-    name = "Ubuntu Libraries"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "api.snapcraft.io",
-       "motd.ubuntu.com",      
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "microsoft_crl" {
-  name                = "Microsoft_CRL_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 450
-  action              = "Allow"
-
-  rule {
-    name = "Required CRL Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "crl.microsoft.com",
-       "mscrl.microsoft.com",
-       "crl3.digicert.com",
-       "ocsp.digicert.com"
-       
-    ]
-
-    protocol {
-      port = "80"
-      type = "Http"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "BlobStorage_rules" {
-  name                = "Microsoft_Blob_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 500
-  action              = "Allow"
-
-  rule {
-    name = "Blob Storage Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "*.blob.core.windows.net"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "database_clamav_rules" {
-  name                = "database_clamav_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 550
-  action              = "Allow"
-
-  rule {
-    name = "Database Clamav Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "database.clamav.net"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "Github_rules" {
-  name                = "Github_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 600
-  action              = "Allow"
-
-  rule {
-    name = "GitHub Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "github.com"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "Microsoft_Metrics_rules" {
-  name                = "Microsoft_Metric_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 650
-  action              = "Allow"
-
-  rule {
-    name = "Microsoft Metric Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "*.prod.microsoftmetrics.com"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "AKS_acs_rules" {
-  name                = "AKS_acs_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 700
-  action              = "Allow"
-
-  rule {
-    name = "AKS acs Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "acs-mirror.azureedge.net",
-       "*.docker.io",
-       "production.cloudflare.docker.com",
-       "*.azurecr.io"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
-    }
-  }
-}
-
-resource "azurerm_firewall_application_rule_collection" "Microsoft_Login_rules" {
-  name                = "Microsoft_Login_rules"
-  azure_firewall_name = azurerm_firewall.azure_firewall_instance.name
-  resource_group_name = var.resource_group_name
-  priority            = 750
-  action              = "Allow"
-
-  rule {
-    name = "Microsoft Login Rules"
-
-    source_addresses = [
-      "*",
-    ]
-
-    target_fqdns = [      
-       
-       "login.microsoftonline.com"
-    ]
-
-    protocol {
-      port = "443"
-      type = "Https"
     }
   }
 }
