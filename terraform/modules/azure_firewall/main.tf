@@ -4,6 +4,7 @@ resource "azurerm_subnet" "azure_firewall" {
     resource_group_name         = var.resource_group_name
     virtual_network_name        = var.azurefw_vnet_name
     address_prefixes            = [var.azurefw_addr_prefix]
+    
 } 
 
 resource "azurerm_public_ip" "azure_firewall" {
@@ -28,10 +29,8 @@ resource "azurerm_firewall" "azure_firewall_instance" {
     name                        = var.azurefw_name
     location                    = var.location
     resource_group_name         = var.resource_group_name
-    
-    dns_servers                 = [ 
-        "168.63.129.16"
-    ]
+    firewall_policy_id          = azurerm_firewall_policy.base_policy.id   
+
     ip_configuration {
         name                    = "configuration"
         subnet_id               = azurerm_subnet.azure_firewall.id 
