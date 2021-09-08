@@ -101,8 +101,8 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      //source_ip_groups = [region1_aks_spk_ip_g_id]
-      source_addresses  = ["10.0.0.1"]
+      source_ip_groups = [region1_aks_spk_ip_g_id]
+      //source_addresses  = ["10.0.0.1"]
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
   }

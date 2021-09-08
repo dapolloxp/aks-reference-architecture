@@ -33,7 +33,7 @@ variable "default_node_pool_size" {
 
 variable "kubernetes_version" {
     description = "The Kubernetes version to use for the cluster."
-    default =  "1.20.5"
+    default =  "1.20.7"
 }
 
 variable "aks_cluster_name" {
