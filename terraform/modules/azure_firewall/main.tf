@@ -103,6 +103,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       source_ip_groups = [var.region1_aks_spk_ip_g_id]      
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
+    
 
     rule {
       name = "ubuntu_libraries"
