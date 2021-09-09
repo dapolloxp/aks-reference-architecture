@@ -141,14 +141,7 @@ resource "helm_release" "aad-pod-identity" {
   
 }
 
-resource "azurerm_user_assigned_identity" "mi_identity" {
-  resource_group_name = azurerm_kubernetes_cluster.aks_c.node_resource_group
-  location            = azurerm_resource_group.aks_rg.location
-  name = "${var.prefix}-ui"
-}
 
-data "azurerm_subscription" "current_sub" {
-}
 
 resource "azurerm_role_assignment" "rbac_assignment" {
   scope                = data.azurerm_subscription.current_sub.id
