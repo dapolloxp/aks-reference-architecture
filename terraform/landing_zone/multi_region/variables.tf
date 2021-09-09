@@ -18,7 +18,7 @@ variable "location" {
 variable "corp_prefix" {
     type        = string 
     description = "Corp name Prefix"
-    default     = "dapolina0"
+    default     = "dapolina1"
 }
 
 # LAW module
@@ -135,7 +135,7 @@ variable "azurefw_addr_prefix_r2" {
 
 variable "acr_name" {
   type = string
-  default = "dapolinaacr01"
+  default = "dapolinaacr02"
 }
 
 # Jump host1  module

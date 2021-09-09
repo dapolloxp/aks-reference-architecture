@@ -4,39 +4,6 @@ data "azurerm_client_config" "current" {}
 data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
-/*
-resource "azurerm_private_dns_zone" "keyvault_zone" {
-  name                = "privatelink.vaultcore.azure.net"
-  resource_group_name = var.resource_group_name
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "hub-link" {
-  name                  = "keyvault-zone-hub-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.keyvault_zone.name
-  virtual_network_id    = var.hub_virtual_network_id
-}
-*/
-/*
-resource "azurerm_private_dns_zone_virtual_network_link" "spoke-link" {
-  name                  = "keyvault-zone-spoke-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.keyvault_zone.name
-  virtual_network_id    = var.spoke_virtual_network_id
-}*/
-
-# NSG for keyvault subnet
-/*
-resource "azurerm_network_security_group" "support_svc_nsg" { 
-    name                        = "support-service-nsg"
-    location                    = var.location
-    resource_group_name         = var.resource_group_name
-}*/
-/*
-resource "azurerm_subnet_network_security_group_association" "support_svc_nsg_assoc" {
-  subnet_id                 = var.shared_subnetid
-  network_security_group_id = azurerm_network_security_group.support_svc_nsg.id
-}*/
 
 resource "azurerm_key_vault" "vault" {
   name                = var.keyvault_name

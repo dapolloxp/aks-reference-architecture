@@ -51,7 +51,7 @@ module "log_analytics" {
   source                          = "../../modules/log_analytics"
   resource_group_name             = azurerm_resource_group.mon_rg.name
   location                        = var.location
-  law_name               = "${var.law_prefix}-core-${azurerm_resource_group.mon_rg.location}-001"
+  law_name               = "${var.law_prefix}-core-${azurerm_resource_group.mon_rg.location}-002"
 }
 
 resource "azurerm_resource_group" "hub_region1" {
