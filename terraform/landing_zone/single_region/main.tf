@@ -317,8 +317,6 @@ module "jump_host" {
     ]
 }
 
-
-
 resource "azurerm_resource_group" "id_shared_region1" {
   #provider = azurerm.identity
   name     = "shared-svc-spk-${var.region1_loc}-rg"
