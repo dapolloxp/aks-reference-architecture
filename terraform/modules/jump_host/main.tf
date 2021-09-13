@@ -84,56 +84,9 @@ resource "azurerm_linux_virtual_machine" "jump_host" {
   }
 }
 
-resource "azurerm_virtual_machine_extension" "Installdependancies" {
-    name                        = "${var.jump_host_name}_vm_extension"
-    virtual_machine_id          = azurerm_linux_virtual_machine.jump_host.id
-    publisher                   = "Microsoft.Azure.Extensions"
-    type                        = "CustomScript"
-    type_handler_version        = "2.0"
-
-    settings = <<SETTINGS
-    {
-        "script":"${filebase64("${path.module}/tools_install.sh")}"
-    }
-    SETTINGS
-    depends_on = [
-      azurerm_key_vault_access_policy.vm_key_access
-    ]
-
-}
-
 
  data "azurerm_client_config" "current" {}
  data "azurerm_subscription" "sub" {
 }
 
- resource "azurerm_role_assignment" "vm_reader" {
-  scope                = data.azurerm_subscription.sub.id
-  //scope                  = tostring(join("",[data.azurerm_subscription.sub.id, "/ResourceGroups/",var.kv_rg]))
-  role_definition_name = "Reader"
-  principal_id         = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
-  depends_on = [
-    azurerm_linux_virtual_machine.jump_host,
-    azurerm_key_vault_access_policy.vm_key_access
-  ]
-}
  
- resource "azurerm_key_vault_access_policy" "vm_key_access" {
-  key_vault_id = var.key_vault_id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
-  //object_id = data.azurerm_client_config.current.object_id
-  //application_id = azurerm_linux_virtual_machine.jump_host.identity[0].principal_id
-  key_permissions = [
-    "Get",
-    "Create"
-  ]
-
-  secret_permissions = [
-    "Get",
-    "Set"
-  ]
-  depends_on = [
-    azurerm_linux_virtual_machine.jump_host
-  ]
-}

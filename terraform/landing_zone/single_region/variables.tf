@@ -18,7 +18,7 @@ variable "location" {
 variable "corp_prefix" {
     type        = string 
     description = "Corp name Prefix"
-    default     = "dapolina1"
+    default     = "corp"
 }
 
 # LAW module
@@ -33,9 +33,12 @@ variable "region1_loc" {
   default = "eastus2"
 }
 
+#Commenting out for single region
+/*
 variable "region2_loc" {
   default = "centralus"
 }
+*/
 
 variable "tags" {
   description = "ARM resource tags to any resource types which accept tags"
@@ -116,26 +119,34 @@ variable "azurefw_name_r1" {
     type        = string
     default     = "fwhub1"
 }
-variable "azurefw_name_r2" {
-    type        = string
-    default     = "fwhub2"
-}
+
 variable "azurefw_addr_prefix_r1" {
     type        = string 
     description = "Azure Firewall VNET prefix"
     default     = "10.1.254.0/24"
 }
+
+#Commenting out for single region
+/*
+
 variable "azurefw_addr_prefix_r2" {
     type        = string 
     description = "Azure Firewall VNET prefix"
     default     = "10.2.254.0/24"
 }
+
+variable "azurefw_name_r2" {
+    type        = string
+    default     = "fwhub2"
+}
+*/
+
 # ACR
 
 
 variable "acr_name" {
   type = string
-  default = "dapolinaacr02"
+  default = "acr"
 }
 
 # Jump host1  module
@@ -169,11 +180,9 @@ variable "jump_host_password" {
 }
 
 
-
-
+/*
+#Commenting out for single region
 # jumphost2
-
-
 variable "jump_host_addr_prefix2" {
     type        = string 
     description = "Azure Jump Host Address Prefix"
@@ -184,6 +193,8 @@ variable "jump_host_private_ip_addr2" {
     description = "Azure Jump Host Address"
     default     = "10.2.251.5"
 }
+*/
+
 /*
 variable "management_subscription_id" {
     type        = string 
