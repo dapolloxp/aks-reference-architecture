@@ -141,9 +141,18 @@ variable "azurefw_name_r2" {
 }
 */
 
+
+
+
+
+
+#Storage Account
+variable "storage_account_name" {
+  type = string
+  default = "storageaccount"
+}
+
 # ACR
-
-
 variable "acr_name" {
   type = string
   default = "acr"

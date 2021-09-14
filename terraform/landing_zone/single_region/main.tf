@@ -174,6 +174,16 @@ module "acr" {
 
 }
 
+module "storage_account" {
+  source = "../../modules/storage_account"
+  resource_group_name                   = azurerm_resource_group.id_shared_region1.name
+  location                              = var.location
+  subnet_id                             = module.id_spk_region1_default_subnet.subnet_id
+  storage_account_name                  = "${var.storage_account_name}${random_string.random.result}"
+  storage_account_blob_private_zone_id  = module.private_dns.storage_account_blob_private_zone_id
+  storage_account_file_private_zone_id  =  module.private_dns.storage_account_file_private_zone_id
+}
+
 module "private_dns" {
   source = "../../modules/azure_dns"
   resource_group_name             = azurerm_resource_group.svc_rg.name

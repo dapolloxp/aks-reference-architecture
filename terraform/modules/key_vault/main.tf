@@ -18,14 +18,7 @@ resource "azurerm_key_vault" "vault" {
   enabled_for_deployment = true
   
 
-  network_acls {
-    bypass         = "AzureServices"
-    default_action = "Deny"
-    ip_rules = [
-      "${chomp(data.http.myip.body)}/32"
-  ]
- 
-  }
+
   
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id

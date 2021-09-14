@@ -37,7 +37,7 @@ resource "azurerm_subnet_network_security_group_association" "jumphost_nsg_assoc
 
 # Virtual Machine for jump_host 
 
-resource "azurerm_linux_virtual_machine" "jump_host" {
+resource "azurerm_windows_virtual_machine" "jump_host" {
   name                  = var.jump_host_name
   location              = var.location
   resource_group_name   = var.resource_group_name
@@ -53,9 +53,9 @@ resource "azurerm_linux_virtual_machine" "jump_host" {
     version   = "latest"
  }*/
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
     version   = "latest"
   }
  
@@ -71,7 +71,7 @@ resource "azurerm_linux_virtual_machine" "jump_host" {
   computer_name      = var.jump_host_name
   admin_username     = var.jump_host_admin_username
   admin_password     = var.jump_host_password
-  disable_password_authentication = false
+
  
   
   provision_vm_agent = true
