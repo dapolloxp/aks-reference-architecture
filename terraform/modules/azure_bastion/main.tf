@@ -8,7 +8,7 @@ resource "azurerm_subnet" "azure_bastion" {
 } 
 
 resource "azurerm_public_ip" "azure_bastion" { 
-    name                        = "azure-bastion-ip"
+    name                        = "pip-azure-bastion"
     location                    = var.location
     resource_group_name         = var.resource_group_name
     allocation_method           = "Static"
@@ -18,7 +18,7 @@ resource "azurerm_public_ip" "azure_bastion" {
 # NSG for Bastion subnet
 
 resource "azurerm_network_security_group" "bastion_nsg" { 
-    name                        = "bastion-nsg"
+    name                        = "nsg-bastion"
     location                    = var.location
     resource_group_name         = var.resource_group_name
 

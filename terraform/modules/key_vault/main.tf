@@ -169,13 +169,13 @@ resource "azurerm_key_vault_access_policy" "admin_policy" {
 
 
 resource "azurerm_private_endpoint" "keyvault-endpoint" {
-  name                = "keyvault-endpoint"
+  name                = "akv-endpoint"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = var.shared_subnetid
 
   private_service_connection {
-    name                           = "kv-private-link-connection"
+    name                           = "akv-private-link-connection"
     private_connection_resource_id = azurerm_key_vault.vault.id
     is_manual_connection           = false
     subresource_names              = ["vault"]

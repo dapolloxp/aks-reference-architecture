@@ -18,7 +18,7 @@ resource "azurerm_container_registry" "acr" {
 
 
 resource "azurerm_private_endpoint" "acr_pe" {
-  name                = "acr-pe"
+  name                = "acr-endpoint"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   subnet_id                = var.subnet_id
@@ -29,7 +29,7 @@ resource "azurerm_private_endpoint" "acr_pe" {
     ]
   }
   private_service_connection {
-    name                           = "kv-private-link-connection"
+    name                           = "acr-private-link-connection"
     private_connection_resource_id = azurerm_container_registry.acr.id
     is_manual_connection           = false
     subresource_names              = ["registry"]

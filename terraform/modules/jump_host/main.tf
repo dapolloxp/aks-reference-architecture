@@ -10,7 +10,7 @@ resource "azurerm_subnet" "jump_host" {
 # NIC for jump_host
 
 resource "azurerm_network_interface" "jump_host" { 
-    name                              = "${var.jump_host_name}-nic"
+    name                              = "nic-${var.jump_host_name}"
     location                          = var.location
     resource_group_name               = var.resource_group_name
     
@@ -25,7 +25,7 @@ resource "azurerm_network_interface" "jump_host" {
 # NSG for jump_host Subnet
 
 resource "azurerm_network_security_group" "jump_host" { 
-    name                        = "jumphost-subnet-nsg"
+    name                        = "nsg-jumphost-subnet"
     location                    = var.location
     resource_group_name         = var.resource_group_name
 }
@@ -60,7 +60,7 @@ resource "azurerm_windows_virtual_machine" "jump_host" {
   }
  
   os_disk {
-    name              = "${var.jump_host_name}-os-disk"
+    name              = "osdisk-${var.jump_host_name}"
     caching           = "ReadWrite"  
     storage_account_type = "Standard_LRS"
   }

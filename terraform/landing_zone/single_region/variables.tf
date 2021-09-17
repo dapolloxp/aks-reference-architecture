@@ -1,13 +1,13 @@
 variable "mon_resource_group_name" {
     type        = string 
     description = "Azure monitoring Resource Group"
-    default     = "mon-core-prod-rg"
+    default     = "rg-mon-core-prod"
 }
 
 variable "svc_resource_group_name" {
     type        = string 
     description = "Shared Services Resource Group"
-    default     = "svc-core-prod-rg"
+    default     = "rg-svc-core-prod"
 }
 
 variable "location" {
@@ -25,7 +25,7 @@ variable "corp_prefix" {
 
 variable law_prefix {
     type       = string
-    default    = "law"
+    default    = "log"
 }
 
 
@@ -45,7 +45,7 @@ variable "tags" {
   type        = map(string)
 
   default = {
-    owner = "dapolina"
+    environment  = "dev"
   }
 }
 
@@ -106,7 +106,7 @@ variable dsc_mode {
 # Azure Bastion module
 variable "azurebastion_name_01" {
     type        = string
-    default     = "corp-bastion-svc_01"
+    default     = "bas-corp-svc-01"
 }
 variable "azurebastion_addr_prefix" {
     type        = string 
@@ -117,7 +117,7 @@ variable "azurebastion_addr_prefix" {
 # Azure Firewall
 variable "azurefw_name_r1" {
     type        = string
-    default     = "fwhub1"
+    default     = "afw"
 }
 
 variable "azurefw_addr_prefix_r1" {
@@ -149,7 +149,7 @@ variable "azurefw_name_r2" {
 #Storage Account
 variable "storage_account_name" {
   type = string
-  default = "storageaccount"
+  default = "st"
 }
 
 # ACR
@@ -161,7 +161,7 @@ variable "acr_name" {
 # Jump host1  module
 variable "jump_host_name" {
     type        = string
-    default     = "jumphostvm"
+    default     = "vmjumphost"
 }
 variable "jump_host_addr_prefix" {
     type        = string 

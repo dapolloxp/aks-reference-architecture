@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "storage_account" {
 
 
 resource "azurerm_private_endpoint" "storage_account_blob_pe" {
-  name                = "storage_account_blob_pe"
+  name                = "st-blob-endpoint"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   subnet_id                = var.subnet_id
@@ -40,7 +40,7 @@ resource "azurerm_private_endpoint" "storage_account_blob_pe" {
 
 
 resource "azurerm_private_endpoint" "storage_account_file_pe" {
-  name                = "storage_account_file_pe"
+  name                = "st-file-endpoint"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   subnet_id                = var.subnet_id

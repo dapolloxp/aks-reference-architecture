@@ -21,7 +21,7 @@ resource "random_string" "random" {
 resource "azurerm_resource_group" "mon_rg" {
     #provider = azurerm.management
     #name                        = var.mon_resource_group_name
-    name                        = "mon-core-prod-${var.location}-rg"
+    name                        = "rg-mon-core-prod-${var.location}"
     location                    = var.location
   tags = {
     "Workload" = "Core Infra"
@@ -52,7 +52,7 @@ module "log_analytics" {
 
 resource "azurerm_resource_group" "hub_region1" {
   #provider = azurerm.connectivity
-  name     = "net-core-hub-${var.region1_loc}-rg"
+  name     = "rg-net-core-hub-${var.region1_loc}"
   location = var.region1_loc
   tags     = var.tags
 }
@@ -106,7 +106,7 @@ resource "azurerm_ip_group" "ip_g_region1_pe_spoke" {
 
 resource "azurerm_resource_group" "id_spk_region1" {
   #provider = azurerm.identity
-  name     = "net-spk-${var.region1_loc}-rg"
+  name     = "rg-net-spk-${var.region1_loc}"
   location = var.region1_loc
   tags     = var.tags
 }
@@ -239,7 +239,7 @@ module "jump_host" {
 
 resource "azurerm_resource_group" "id_shared_region1" {
   #provider = azurerm.identity
-  name     = "shared-svc-spk-${var.region1_loc}-rg"
+  name     = "rg-shared-svc-spk-${var.region1_loc}"
   location = var.region1_loc
   tags     = var.tags
 }
@@ -263,7 +263,7 @@ module "hub_keyvault" {
     source  = "../../modules/key_vault"
     resource_group_name   = azurerm_resource_group.id_shared_region1.name
     location              = azurerm_resource_group.id_shared_region1.location
-    keyvault_name         = "kv-${random_string.random.result}"
+    keyvault_name         = "akv-${random_string.random.result}"
     shared_subnetid       = module.id_spk_region1_shared_subnet.subnet_id
     kv_private_zone_id    = module.private_dns.kv_private_zone_id
     kv_private_zone_name  = module.private_dns.kv_private_zone_name
