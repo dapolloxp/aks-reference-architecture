@@ -184,9 +184,23 @@ variable "jump_host_admin_username" {
     default = "azureadmin"
 }
 variable "jump_host_password" {
-    sensitive   = true
     type        = string 
+    sensitive   = true
 }
+
+#App Insights
+variable "app_insights_name" {
+  type = string
+  default = "appi"
+}
+
+#Machine Learning Workspace
+variable "mlw_name" {
+  type = string
+  default = "mlw"
+}
+
+
 
 
 /*

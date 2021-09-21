@@ -76,7 +76,7 @@ module "hub_region1_default_subnet"{
   source = "../../modules/networking/subnet"
   resource_group_name = azurerm_resource_group.hub_region1.name
   vnet_name = module.hub_region1.vnet_name
-  subnet_name = "default-subnet"
+  subnet_name = "snet-default"
   subnet_prefixes = ["10.1.1.0/24"]
   azure_fw_ip = module.azure_firewall_region1.ip
 }
@@ -125,14 +125,34 @@ module "id_spk_region1" {
 
 #################################
 
-module "id_spk_region1_default_subnet" {
+module "id_spk_region1_workspace_subnet" {
   
   source = "../../modules/networking/subnet"
   resource_group_name = azurerm_resource_group.id_spk_region1.name
   vnet_name = module.id_spk_region1.vnet_name
-  subnet_name = "default-subnet"
-  //subnet_prefixes = ["10.3.1.0/24"]
-  subnet_prefixes = ["10.3.4.0/22"]
+  subnet_name = "snet-workspace"
+  subnet_prefixes = ["10.3.1.0/24"]
+  azure_fw_ip = module.azure_firewall_region1.ip
+}
+
+#Add Additional subnets Needed
+module "id_spk_region1_aks_subnet"{
+  #providers = {azurerm = azurerm.identity}
+  source = "../../modules/networking/subnet"
+  resource_group_name = azurerm_resource_group.id_spk_region1.name
+  vnet_name = module.id_spk_region1.vnet_name
+  subnet_name = "snet-aks"
+  subnet_prefixes = ["10.3.2.0/24"]
+  azure_fw_ip = module.azure_firewall_region1.ip
+}
+
+module "id_spk_region1_training_subnet"{
+  #providers = {azurerm = azurerm.identity}
+  source = "../../modules/networking/subnet"
+  resource_group_name = azurerm_resource_group.id_spk_region1.name
+  vnet_name = module.id_spk_region1.vnet_name
+  subnet_name = "snet-training"
+  subnet_prefixes = ["10.3.3.0/24"]
   azure_fw_ip = module.azure_firewall_region1.ip
 }
 
@@ -167,7 +187,7 @@ module "acr" {
   source = "../../modules/acr"
   resource_group_name             = azurerm_resource_group.id_shared_region1.name
   location                        = var.location
-  subnet_id                       = module.id_spk_region1_default_subnet.subnet_id
+  subnet_id                       = module.id_spk_region1_workspace_subnet.subnet_id
   //subnet_id                       = module.id_pe_region1_default_subnet.subnet_id
   acr_name                        = "${var.acr_name}${random_string.random.result}"
   acr_private_zone_id             = module.private_dns.acr_private_zone_id
@@ -178,10 +198,10 @@ module "storage_account" {
   source = "../../modules/storage_account"
   resource_group_name                   = azurerm_resource_group.id_shared_region1.name
   location                              = var.location
-  subnet_id                             = module.id_spk_region1_default_subnet.subnet_id
+  subnet_id                             = module.id_spk_region1_workspace_subnet.subnet_id
   storage_account_name                  = "${var.storage_account_name}${random_string.random.result}"
   storage_account_blob_private_zone_id  = module.private_dns.storage_account_blob_private_zone_id
-  storage_account_file_private_zone_id  =  module.private_dns.storage_account_file_private_zone_id
+  storage_account_file_private_zone_id  = module.private_dns.storage_account_file_private_zone_id
 }
 
 module "private_dns" {
@@ -244,28 +264,37 @@ resource "azurerm_resource_group" "id_shared_region1" {
   tags     = var.tags
 }
 
-#Add Additional subnets Needed
-module "id_spk_region1_shared_subnet"{
-  #providers = {azurerm = azurerm.identity}
-  source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  vnet_name = module.id_spk_region1.vnet_name
-  subnet_name = "shared"
-  subnet_prefixes = ["10.3.2.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
-}
-
-
-#Need to fix Private Endpoint and location of DNS Zone
-
 module "hub_keyvault" {
     
     source  = "../../modules/key_vault"
     resource_group_name   = azurerm_resource_group.id_shared_region1.name
     location              = azurerm_resource_group.id_shared_region1.location
     keyvault_name         = "akv-${random_string.random.result}"
-    shared_subnetid       = module.id_spk_region1_shared_subnet.subnet_id
+    subnet_id             = module.id_spk_region1_workspace_subnet.subnet_id
     kv_private_zone_id    = module.private_dns.kv_private_zone_id
     kv_private_zone_name  = module.private_dns.kv_private_zone_name
-    depends_on            = [module.id_spk_region1_shared_subnet]
+}
+
+
+#App Insights
+module "app_insights"{
+  source = "../../modules/app_insights"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.id_shared_region1.name
+  app_insights_name   = "${var.app_insights_name}-${random_string.random.result}"
+}
+
+#Machine Learning Workspace
+module "machine_learning_workspace" {
+  source = "../../modules/machine_learning_workspace"
+  mlw_name                = "${var.mlw_name}-${random_string.random.result}"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.id_shared_region1.name
+  application_insights_id = module.app_insights.app_insights_id
+  key_vault_id            = module.hub_keyvault.kv_id
+  storage_account_id      = module.storage_account.storage_account_id
+  container_registry_id   = module.acr.acr_id
+  subnet_id               = module.id_spk_region1_workspace_subnet.subnet_id
+  machine_learning_workspace_notebooks_zone_id  = module.private_dns.machine_learning_workspace_notebooks_zone_id
+  machine_learning_workspace_api_zone_id        = module.private_dns.machine_learning_workspace_api_zone_id
 }

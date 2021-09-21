@@ -16,3 +16,11 @@ output "storage_account_blob_private_zone_id" {
 output "storage_account_file_private_zone_id" {
     value = azurerm_private_dns_zone.storage_account_file_zone.id
 }
+
+output "machine_learning_workspace_notebooks_zone_id" {
+    value = azurerm_private_dns_zone.machine_learning_workspace_notebooks_zone.id
+}
+
+output "machine_learning_workspace_api_zone_id" {
+    value = azurerm_private_dns_zone.machine_learning_workspace_api_zone.id
+}

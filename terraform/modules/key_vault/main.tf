@@ -172,7 +172,7 @@ resource "azurerm_private_endpoint" "keyvault-endpoint" {
   name                = "akv-endpoint"
   location            = var.location
   resource_group_name = var.resource_group_name
-  subnet_id           = var.shared_subnetid
+  subnet_id           = var.subnet_id
 
   private_service_connection {
     name                           = "akv-private-link-connection"

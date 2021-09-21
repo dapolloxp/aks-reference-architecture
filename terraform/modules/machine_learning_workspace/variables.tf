@@ -1,0 +1,10 @@
+variable "mlw_name" {}
+variable "location" {}
+variable "resource_group_name" {}
+variable "application_insights_id" {}
+variable "key_vault_id" {}
+variable "storage_account_id" {}
+variable "container_registry_id" {}
+variable "subnet_id" {}
+variable "machine_learning_workspace_notebooks_zone_id" {}
+variable "machine_learning_workspace_api_zone_id" {}
