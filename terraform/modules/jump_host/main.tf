@@ -1,7 +1,7 @@
 # Jump host TF Module
 # Subnet for jump_host
 resource "azurerm_subnet" "jump_host" {
-    name                        = "jumphost-subnet"
+    name                        = "snet-jumphost"
     resource_group_name         = var.resource_group_name
     virtual_network_name        = var.jump_host_vnet_name
     address_prefixes            = [var.jump_host_addr_prefix]
@@ -34,6 +34,36 @@ resource "azurerm_subnet_network_security_group_association" "jumphost_nsg_assoc
   subnet_id                 = azurerm_subnet.jump_host.id 
   network_security_group_id = azurerm_network_security_group.jump_host.id
 }
+
+#Route Table for Jump Host
+resource "azurerm_route_table" "jumphost_rt" {
+  
+  name = "rt-${azurerm_subnet.jump_host.name}"
+
+  lifecycle {
+    ignore_changes = [      
+      tags
+    ]
+  }
+  resource_group_name                 = azurerm_subnet.jump_host.resource_group_name
+  location                            = var.location
+
+  route {
+    name                        = "default_egress"
+    address_prefix              = "0.0.0.0/0" 
+    next_hop_type               = "VirtualAppliance"
+    next_hop_in_ip_address      =  var.azure_fw_ip
+  }
+
+}
+
+resource "azurerm_subnet_route_table_association" "route_assoc" {
+  subnet_id      = azurerm_subnet.jump_host.id
+  route_table_id = azurerm_route_table.jumphost_rt.id
+  
+}
+
+
 
 # Virtual Machine for jump_host 
 

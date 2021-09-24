@@ -7,7 +7,7 @@ variable "mon_resource_group_name" {
 variable "svc_resource_group_name" {
     type        = string 
     description = "Shared Services Resource Group"
-    default     = "rg-svc-core-prod"
+    default     = "rg-pdz-core-prod"
 }
 
 variable "location" {

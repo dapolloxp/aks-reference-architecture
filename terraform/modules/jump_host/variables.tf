@@ -26,3 +26,4 @@ variable "jump_host_admin_username" {}
 variable "jump_host_password" {}
 
 variable "key_vault_id" {}
+variable "azure_fw_ip" {}

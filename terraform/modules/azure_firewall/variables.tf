@@ -3,6 +3,7 @@ variable "location" {}
 variable "azurefw_name" {}
 variable "azurefw_vnet_name" {}
 variable "azurefw_addr_prefix" {}
-variable "sc_law_id" {}
-
-variable region1_aks_spk_ip_g_id {}
+variable "law_id" {}
+variable "azfw_diag_name" {}
+variable "region1_mlw_spk_ip_g_id" {}
+variable "region1_hub_ip_g_id" {}
