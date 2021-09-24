@@ -18,7 +18,6 @@ data "azurerm_virtual_network" "vnet_name" {
 
 
 resource "azurerm_route_table" "spoke_rt" {
-  #count = length(data.azurerm_virtual_network.vnetexample.subnets)
   
   name = "rt-${azurerm_subnet.vnet.name}"
 

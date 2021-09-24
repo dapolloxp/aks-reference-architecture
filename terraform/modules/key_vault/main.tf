@@ -16,10 +16,7 @@ resource "azurerm_key_vault" "vault" {
   soft_delete_retention_days = 7
   enabled_for_template_deployment = true
   enabled_for_deployment = true
-  
-
-
-  
+   
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
@@ -91,82 +88,6 @@ resource "azurerm_key_vault" "vault" {
   }
 
 }
-/*
-resource "azurerm_key_vault_access_policy" "admin_policy" {
-  key_vault_id = azurerm_key_vault.vault.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
-  
-
-  certificate_permissions = [
-      "backup",
-      "create",
-      "delete",
-      "deleteissuers",
-      "get",
-      "getissuers",
-      "import",
-      "list",
-      "listissuers",
-      "managecontacts",
-      "manageissuers",
-      "purge",
-      "recover",
-      "restore",
-      "setissuers",
-      "update"
-    ]
-
-    key_permissions = [
-      "list",
-      "encrypt",
-      "decrypt",
-      "wrapKey",
-      "unwrapKey",
-      "sign",
-      "verify",
-      "get",
-      "create",
-      "update",
-      "import",
-      "backup",
-      "restore",
-      "recover",
-      "delete",
-      "purge"
-    ]
-
-    secret_permissions = [
-      "list",
-      "get",
-      "set",
-      "backup",
-      "restore",
-      "recover",
-      "purge",
-      "delete"
-    ]
-
-    storage_permissions = [
-      "backup",
-      "delete",
-      "deletesas",
-      "get",
-      "getsas",
-      "listsas",
-      "purge",
-      "recover",
-      "regeneratekey",
-      "restore",
-      "set",
-      "setsas",
-      "update"
-    ]
-    
-}
-*/
-
-
 
 resource "azurerm_private_endpoint" "keyvault-endpoint" {
   name                = "akv-endpoint"

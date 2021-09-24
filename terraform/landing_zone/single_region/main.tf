@@ -19,8 +19,6 @@ resource "random_string" "random" {
 
 # Resource group 
 resource "azurerm_resource_group" "mon_rg" {
-    #provider = azurerm.management
-    #name                        = var.mon_resource_group_name
     name                        = "rg-mon-core-prod-${var.location}"
     location                    = var.location
   tags = {
@@ -32,7 +30,6 @@ resource "azurerm_resource_group" "mon_rg" {
 
 
 resource "azurerm_resource_group" "svc_rg" {
-    #provider = azurerm.management
     name                        = var.svc_resource_group_name
     location                    = var.location
   tags = {
@@ -43,7 +40,6 @@ resource "azurerm_resource_group" "svc_rg" {
 }
 
 module "log_analytics" {
-  #providers = {azurerm = azurerm.management}
   source                          = "../../modules/log_analytics"
   resource_group_name             = azurerm_resource_group.mon_rg.name
   location                        = var.location
@@ -51,13 +47,10 @@ module "log_analytics" {
 }
 
 resource "azurerm_resource_group" "hub_region1" {
-  #provider = azurerm.connectivity
   name     = "rg-net-core-hub-${var.region1_loc}"
   location = var.region1_loc
   tags     = var.tags
 }
-
-
 
 module "hub_region1" {
   
@@ -67,7 +60,6 @@ module "hub_region1" {
 
   vnet_name             = "vnet-hub-${var.region1_loc}"
   address_space         = "10.1.0.0/16"
- # default_subnet_prefixes = ["10.1.1.0/24"]
   dns_servers = ["168.63.129.16"]
 }
 
@@ -105,7 +97,6 @@ resource "azurerm_ip_group" "ip_g_region1_pe_spoke" {
 
 
 resource "azurerm_resource_group" "id_spk_region1" {
-  #provider = azurerm.identity
   name     = "rg-net-spk-${var.region1_loc}"
   location = var.region1_loc
   tags     = var.tags
@@ -113,13 +104,11 @@ resource "azurerm_resource_group" "id_spk_region1" {
 
 # Create spoke for region1
 module "id_spk_region1" {
-  #providers = {azurerm = azurerm.identity}
   source = "../../modules/networking/vnet"
   resource_group_name = azurerm_resource_group.id_spk_region1.name
   location            = azurerm_resource_group.id_spk_region1.location
   vnet_name             = "vnet-spk-${var.region1_loc}"
   address_space         = "10.3.0.0/16"
-  # default_subnet_prefixes = ["10.3.1.0/24"]
   dns_servers = [module.azure_firewall_region1.ip]
 }
 
@@ -137,7 +126,6 @@ module "id_spk_region1_workspace_subnet" {
 
 #Add Additional subnets Needed
 module "id_spk_region1_aks_subnet"{
-  #providers = {azurerm = azurerm.identity}
   source = "../../modules/networking/subnet"
   resource_group_name = azurerm_resource_group.id_spk_region1.name
   vnet_name = module.id_spk_region1.vnet_name
@@ -147,7 +135,6 @@ module "id_spk_region1_aks_subnet"{
 }
 
 module "id_spk_region1_training_subnet"{
-  #providers = {azurerm = azurerm.identity}
   source = "../../modules/networking/subnet"
   resource_group_name = azurerm_resource_group.id_spk_region1.name
   vnet_name = module.id_spk_region1.vnet_name
@@ -160,7 +147,6 @@ module "id_spk_region1_training_subnet"{
 
 # Peering between hub1 and spk1
 module "peering_spk_Region1_1" {
-  #providers = {azurerm = azurerm.connectivity}
   source = "../../modules/networking/peering_direction1"
   resource_group_nameA = azurerm_resource_group.hub_region1.name
   resource_group_nameB = azurerm_resource_group.id_spk_region1.name
@@ -172,7 +158,6 @@ module "peering_spk_Region1_1" {
 
 # Peering between hub1 and spk1
 module "peering_id_spk_Region1_2" {
-  #providers = {azurerm = azurerm.identity}
   source = "../../modules/networking/peering_direction2"
   resource_group_nameA = azurerm_resource_group.hub_region1.name
   resource_group_nameB = azurerm_resource_group.id_spk_region1.name
@@ -182,13 +167,11 @@ module "peering_id_spk_Region1_2" {
   netB_id              = module.id_spk_region1.vnet_id
 }
 
-
 module "acr" {
   source = "../../modules/acr"
   resource_group_name             = azurerm_resource_group.id_shared_region1.name
   location                        = var.location
   subnet_id                       = module.id_spk_region1_workspace_subnet.subnet_id
-  //subnet_id                       = module.id_pe_region1_default_subnet.subnet_id
   acr_name                        = "${var.acr_name}${random_string.random.result}"
   acr_private_zone_id             = module.private_dns.acr_private_zone_id
 
@@ -211,11 +194,9 @@ module "private_dns" {
   hub_virtual_network_id          = module.hub_region1.vnet_id
 }
 
-
 # Bastion Host
 
-module "bastion_region1" {
-  #providers = {azurerm = azurerm.connectivity}
+module "bastion_region1" { 
   source = "../../modules/azure_bastion"
   resource_group_name       = azurerm_resource_group.hub_region1.name
   location                  = azurerm_resource_group.hub_region1.location
@@ -239,7 +220,6 @@ module "azure_firewall_region1" {
 # Jump host  Errors on creation with VMExtention is commented out
 
 module "jump_host" { 
-    #providers = {azurerm = azurerm.connectivity}
     source                               = "../../modules/jump_host"
     resource_group_name                  = azurerm_resource_group.hub_region1.name
     location                             = azurerm_resource_group.hub_region1.location

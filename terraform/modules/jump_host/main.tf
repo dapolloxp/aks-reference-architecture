@@ -45,13 +45,7 @@ resource "azurerm_windows_virtual_machine" "jump_host" {
         azurerm_network_interface.jump_host.id
     ]
   size               = var.jump_host_vm_size
-  /*
-  storage_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2019-Datacenter"
-    version   = "latest"
- }*/
+ 
   source_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
@@ -71,19 +65,14 @@ resource "azurerm_windows_virtual_machine" "jump_host" {
   computer_name      = var.jump_host_name
   admin_username     = var.jump_host_admin_username
   admin_password     = var.jump_host_password
-
- 
   
   provision_vm_agent = true
-  
  
-
   timeouts {
       create = "60m"
       delete = "2h"
   }
 }
-
 
  data "azurerm_client_config" "current" {}
  data "azurerm_subscription" "sub" {

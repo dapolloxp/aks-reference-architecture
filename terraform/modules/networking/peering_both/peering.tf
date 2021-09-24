@@ -1,6 +1,5 @@
 resource "azurerm_virtual_network_peering" "direction1" {
   name                         = "${var.netA_name}-to-${var.netB_name}"
-  #enable = "${var.direction == "first" ? true : false} | ${var.direction == "both" ? true : false}"
   resource_group_name          = var.resource_group_nameA
   virtual_network_name         = var.netA_name
   remote_virtual_network_id    = var.netB_id
@@ -13,7 +12,6 @@ resource "azurerm_virtual_network_peering" "direction1" {
 
 resource "azurerm_virtual_network_peering" "direction2" {
   name                         = "${var.netB_name}-to-${var.netA_name}"
-  #enable = "${var.direction == "second" ? true : false} | ${var.direction == "both" ? true : false}"
   resource_group_name          = var.resource_group_nameB
   virtual_network_name         = var.netB_name
   remote_virtual_network_id    = var.netA_id
