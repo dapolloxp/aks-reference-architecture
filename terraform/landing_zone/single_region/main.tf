@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "2.63"
+      version = "2.78"
     }
   }
 }
@@ -17,7 +17,7 @@ resource "random_string" "random" {
 
 }
 
-# Resource group 
+#Monitoring Resource group 
 resource "azurerm_resource_group" "mon_rg" {
     name                        = "rg-mon-core-prod-${var.location}"
     location                    = var.location
@@ -28,14 +28,14 @@ resource "azurerm_resource_group" "mon_rg" {
   }
 }
 
-
+#Shared Services Resource Group
 resource "azurerm_resource_group" "svc_rg" {
     name                        = "${var.svc_resource_group_name}-${var.location}"
     location                    = var.location
   tags = {}
   
   }
-
+#Log Analytics WorkSpace
 module "log_analytics" {
   source                          = "../../modules/log_analytics"
   resource_group_name             = azurerm_resource_group.mon_rg.name
@@ -43,246 +43,237 @@ module "log_analytics" {
   law_name                        = "${var.law_prefix}-core-${azurerm_resource_group.mon_rg.location}-${random_string.random.result}"
 }
 
-resource "azurerm_resource_group" "hub_region1" {
-  name     = "rg-net-core-hub-${var.region1_loc}"
-  location = var.region1_loc
+#Hub Resource Group
+resource "azurerm_resource_group" "hub_rg" {
+  name     = "rg-net-core-hub-${var.location}"
+  location = var.location
   tags     = var.tags
 }
 
-module "hub_region1" {
+#Hub Vnet
+module "hub_vnet" {
   
   source = "../../modules/networking/vnet"
-  resource_group_name = azurerm_resource_group.hub_region1.name
-  location            = azurerm_resource_group.hub_region1.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
+  location            = azurerm_resource_group.hub_rg.location
 
-  vnet_name             = "vnet-hub-${var.region1_loc}"
+  vnet_name             = "vnet-hub-${var.location}"
   address_space         = "10.1.0.0/16"
   dns_servers = ["168.63.129.16"]
 }
 
-module "hub_region1_default_subnet"{
+#Hub subnets
+module "hub_vnet_default_subnet"{
   
   source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.hub_region1.name
-  vnet_name = module.hub_region1.vnet_name
+  resource_group_name = azurerm_resource_group.hub_rg.name
+  vnet_name = module.hub_vnet.vnet_name
   subnet_name = "snet-default"
   subnet_prefixes = ["10.1.1.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
+  azure_fw_ip = module.azure_firewall.ip
 }
 
-resource "azurerm_ip_group" "ip_g_region1_hub" {
-  name                = "region1-hub-ipgroup"
-  location            = azurerm_resource_group.hub_region1.location
-  resource_group_name = azurerm_resource_group.hub_region1.name
+#Hub IP Group
+resource "azurerm_ip_group" "ip_group_hub" {
+  name                = "hub-ipgroup"
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs = ["10.1.0.0/16"]
 
 }
-
-resource "azurerm_ip_group" "ip_g_region1_mlw_spoke" {
-  name                = "region1-mlw-spoke-ipgroup"
-  location            = azurerm_resource_group.hub_region1.location
-  resource_group_name = azurerm_resource_group.hub_region1.name
+#IP Group for MLW Spoke Vnet
+resource "azurerm_ip_group" "ip_group_mlw_spoke" {
+  name                = "mlw-spoke-ipgroup"
+  location            = azurerm_resource_group.hub_rg.location
+  resource_group_name = azurerm_resource_group.hub_rg.name
   cidrs = ["10.3.0.0/16"]
 }
 
-resource "azurerm_ip_group" "ip_g_region1_pe_spoke" {
-  name                = "region1-pe-spoke-ipgroup"
-  location            = azurerm_resource_group.hub_region1.location
-  resource_group_name = azurerm_resource_group.hub_region1.name
-  cidrs = ["10.4.0.0/16"]
-}
-
-
-resource "azurerm_resource_group" "id_spk_region1" {
-  name     = "rg-net-spoke-${var.region1_loc}"
-  location = var.region1_loc
+#Spoke Vnet Resource Group
+resource "azurerm_resource_group" "spoke_vnet_rg" {
+  name     = "rg-net-spoke-${var.location}"
+  location = var.location
   tags     = var.tags
 }
 
-# Create spoke for region1
-module "id_spk_region1" {
+# Create spoke Vnet for MLW
+module "spoke_vnet" {
   source = "../../modules/networking/vnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  location            = azurerm_resource_group.id_spk_region1.location
-  vnet_name             = "vnet-spk-${var.region1_loc}"
+  resource_group_name = azurerm_resource_group.spoke_vnet_rg.name
+  location            = azurerm_resource_group.spoke_vnet_rg.location
+  vnet_name             = "vnet-spk-${var.location}"
   address_space         = "10.3.0.0/16"
-  dns_servers = [module.azure_firewall_region1.ip]
+  dns_servers = [module.azure_firewall.ip]
 }
 
-#################################
-
-module "id_spk_region1_workspace_subnet" {
-  
+# Spoke Subnet
+module "spoke_vnet_aks_subnet"{
   source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  vnet_name = module.id_spk_region1.vnet_name
-  subnet_name = "snet-workspace"
-  subnet_prefixes = ["10.3.1.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
-}
-
-#Add Additional subnets Needed
-module "id_spk_region1_aks_subnet"{
-  source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  vnet_name = module.id_spk_region1.vnet_name
+  resource_group_name = azurerm_resource_group.spoke_vnet_rg.name
+  vnet_name = module.spoke_vnet.vnet_name
   subnet_name = "snet-aks"
   subnet_prefixes = ["10.3.2.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
+  azure_fw_ip = module.azure_firewall.ip
 }
 
-module "id_spk_region1_training_subnet"{
+# Spoke Subnet
+module "spoke_vnet_training_subnet"{
   source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  vnet_name = module.id_spk_region1.vnet_name
+  resource_group_name = azurerm_resource_group.spoke_vnet_rg.name
+  vnet_name = module.spoke_vnet.vnet_name
   subnet_name = "snet-training"
   subnet_prefixes = ["10.3.3.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
+  azure_fw_ip = module.azure_firewall.ip
 }
 
-module "id_spk_region1_scoring_subnet"{
+# Spoke Subnet
+module "spoke_vnet_scoring_subnet"{
   source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region1.name
-  vnet_name = module.id_spk_region1.vnet_name
+  resource_group_name = azurerm_resource_group.spoke_vnet_rg.name
+  vnet_name = module.spoke_vnet.vnet_name
   subnet_name = "snet-scoring"
   subnet_prefixes = ["10.3.4.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
+  azure_fw_ip = module.azure_firewall.ip
 }
 
 
-# Peering between hub1 and spk1
-module "peering_spk_Region1_1" {
+# Peering between hub vnet and spoke vnet
+module "peering_hub_to_spoke" {
   source = "../../modules/networking/peering_direction1"
-  resource_group_nameA = azurerm_resource_group.hub_region1.name
-  resource_group_nameB = azurerm_resource_group.id_spk_region1.name
-  netA_name            = module.hub_region1.vnet_name
-  netA_id              = module.hub_region1.vnet_id
-  netB_name            = module.id_spk_region1.vnet_name
-  netB_id              = module.id_spk_region1.vnet_id
+  resource_group_nameA = azurerm_resource_group.hub_rg.name
+  resource_group_nameB = azurerm_resource_group.spoke_vnet_rg.name
+  netA_name            = module.hub_vnet.vnet_name
+  netA_id              = module.hub_vnet.vnet_id
+  netB_name            = module.spoke_vnet.vnet_name
+  netB_id              = module.spoke_vnet.vnet_id
 }
 
 # Peering between hub1 and spk1
-module "peering_id_spk_Region1_2" {
+module "peering_spoke_to_hub" {
   source = "../../modules/networking/peering_direction2"
-  resource_group_nameA = azurerm_resource_group.hub_region1.name
-  resource_group_nameB = azurerm_resource_group.id_spk_region1.name
-  netA_name            = module.hub_region1.vnet_name
-  netA_id              = module.hub_region1.vnet_id
-  netB_name            = module.id_spk_region1.vnet_name
-  netB_id              = module.id_spk_region1.vnet_id
+  resource_group_nameA = azurerm_resource_group.hub_rg.name
+  resource_group_nameB = azurerm_resource_group.spoke_vnet_rg.name
+  netA_name            = module.hub_vnet.vnet_name
+  netA_id              = module.hub_vnet.vnet_id
+  netB_name            = module.spoke_vnet.vnet_name
+  netB_id              = module.spoke_vnet.vnet_id
 }
 
-module "acr" {
-  source = "../../modules/acr"
-  resource_group_name             = azurerm_resource_group.id_shared_region1.name
-  location                        = var.location
-  subnet_id                       = module.id_spk_region1_training_subnet.subnet_id
-  acr_name                        = "${var.acr_name}${random_string.random.result}"
-  acr_private_zone_id             = module.private_dns.acr_private_zone_id
-
-}
-
-module "storage_account" {
-  source = "../../modules/storage_account"
-  resource_group_name                   = azurerm_resource_group.id_shared_region1.name
-  location                              = var.location
-  subnet_id                             = module.id_spk_region1_training_subnet.subnet_id
-  storage_account_name                  = "${var.storage_account_name}${random_string.random.result}"
-  storage_account_blob_private_zone_id  = module.private_dns.storage_account_blob_private_zone_id
-  storage_account_file_private_zone_id  = module.private_dns.storage_account_file_private_zone_id
-}
 
 module "private_dns" {
   source = "../../modules/azure_dns"
   resource_group_name             = azurerm_resource_group.svc_rg.name
   location                        = var.location
-  hub_virtual_network_id          = module.hub_region1.vnet_id
+  hub_virtual_network_id          = module.hub_vnet.vnet_id
 }
 
 # Bastion Host
 
-module "bastion_region1" { 
+module "bastion" { 
   source = "../../modules/azure_bastion"
-  resource_group_name       = azurerm_resource_group.hub_region1.name
-  location                  = azurerm_resource_group.hub_region1.location
-  azurebastion_name         = var.azurebastion_name_01
-  azurebastion_vnet_name    = module.hub_region1.vnet_name
+  resource_group_name       = azurerm_resource_group.hub_rg.name
+  location                  = azurerm_resource_group.hub_rg.location
+  azurebastion_name         = var.azurebastion_name
+  azurebastion_vnet_name    = module.hub_vnet.vnet_name
   azurebastion_addr_prefix  = "10.1.250.0/24"
 }
 
-
-module "azure_firewall_region1" { 
+#Hub Azure Firewall
+module "azure_firewall" { 
     source                      = "../../modules/azure_firewall"
-    resource_group_name         = azurerm_resource_group.hub_region1.name
-    location                    = azurerm_resource_group.hub_region1.location
-    azurefw_name                = "${var.azurefw_name_r1}-${random_string.random.result}"
-    azurefw_vnet_name           = module.hub_region1.vnet_name
-    azurefw_addr_prefix         = var.azurefw_addr_prefix_r1
+    resource_group_name         = azurerm_resource_group.hub_rg.name
+    location                    = azurerm_resource_group.hub_rg.location
+    azurefw_name                = "${var.azurefw_name}-${random_string.random.result}"
+    azurefw_vnet_name           = module.hub_vnet.vnet_name
+    azurefw_addr_prefix         = var.azurefw_addr_prefix
     law_id                      = module.log_analytics.log_analytics_id
     azfw_diag_name              = "monitoring-${random_string.random.result}"
-    region1_mlw_spk_ip_g_id     = azurerm_ip_group.ip_g_region1_mlw_spoke.id
-    region1_hub_ip_g_id         = azurerm_ip_group.ip_g_region1_hub.id
+    region1_mlw_spk_ip_g_id     = azurerm_ip_group.ip_group_mlw_spoke.id
+    region1_hub_ip_g_id         = azurerm_ip_group.ip_group_hub.id
 }
 
-# Jump host  Errors on creation with VMExtention is commented out
+# Jump host 
 
 module "jump_host" { 
     source                               = "../../modules/jump_host"
-    resource_group_name                  = azurerm_resource_group.hub_region1.name
-    location                             = azurerm_resource_group.hub_region1.location
+    resource_group_name                  = azurerm_resource_group.hub_rg.name
+    location                             = azurerm_resource_group.hub_rg.location
     jump_host_name                       = var.jump_host_name
-    jump_host_vnet_name                  = module.hub_region1.vnet_name
+    jump_host_vnet_name                  = module.hub_vnet.vnet_name
     jump_host_addr_prefix                = var.jump_host_addr_prefix
     jump_host_private_ip_addr            = var.jump_host_private_ip_addr
     jump_host_vm_size                    = var.jump_host_vm_size
     jump_host_admin_username             = var.jump_host_admin_username
     jump_host_password                   = var.jump_host_password
-    key_vault_id                         = module.hub_keyvault.kv_key_zone_id
-    kv_rg                                = azurerm_resource_group.id_shared_region1.name
-    azure_fw_ip                          = module.azure_firewall_region1.ip
+    key_vault_id                         = module.keyvault.kv_key_zone_id
+    kv_rg                                = azurerm_resource_group.spoke_shared_rg.name
+    azure_fw_ip                          = module.azure_firewall.ip
     depends_on = [
-      azurerm_resource_group.id_shared_region1
+      azurerm_resource_group.spoke_shared_rg
     ]
 }
 
-resource "azurerm_resource_group" "id_shared_region1" {
+#Spoke shared resource group
+resource "azurerm_resource_group" "spoke_shared_rg" {
   #provider = azurerm.identity
-  name     = "rg-shared-mlw-spoke-${var.region1_loc}"
-  location = var.region1_loc
+  name     = "rg-shared-mlw-spoke-${var.location}"
+  location = var.location
   tags     = var.tags
 }
 
-module "hub_keyvault" {
+#Spoke ACR
+module "acr" {
+  source = "../../modules/acr"
+  resource_group_name             = azurerm_resource_group.spoke_shared_rg.name
+  location                        = var.location
+  subnet_id                       = module.spoke_vnet_training_subnet.subnet_id
+  acr_name                        = "${var.acr_name}${random_string.random.result}"
+  acr_private_zone_id             = module.private_dns.acr_private_zone_id
+
+}
+#Spoke Storage Account
+module "storage_account" {
+  source = "../../modules/storage_account"
+  resource_group_name                   = azurerm_resource_group.spoke_shared_rg.name
+  location                              = var.location
+  subnet_id                             = module.spoke_vnet_training_subnet.subnet_id
+  storage_account_name                  = "${var.storage_account_name}${random_string.random.result}"
+  storage_account_blob_private_zone_id  = module.private_dns.storage_account_blob_private_zone_id
+  storage_account_file_private_zone_id  = module.private_dns.storage_account_file_private_zone_id
+}
+
+#Spoke Key Vault
+module "keyvault" {
     
     source  = "../../modules/key_vault"
-    resource_group_name   = azurerm_resource_group.id_shared_region1.name
-    location              = azurerm_resource_group.id_shared_region1.location
+    resource_group_name   = azurerm_resource_group.spoke_shared_rg.name
+    location              = azurerm_resource_group.spoke_shared_rg.location
     keyvault_name         = "akv-${random_string.random.result}"
-    subnet_id             = module.id_spk_region1_training_subnet.subnet_id
+    subnet_id             = module.spoke_vnet_training_subnet.subnet_id
     kv_private_zone_id    = module.private_dns.kv_private_zone_id
     kv_private_zone_name  = module.private_dns.kv_private_zone_name
 }
 
 
-#App Insights
+#Spoke App Insights
 module "app_insights"{
   source = "../../modules/app_insights"
   location            = var.location
-  resource_group_name = azurerm_resource_group.id_shared_region1.name
+  resource_group_name = azurerm_resource_group.spoke_shared_rg.name
   app_insights_name   = "${var.app_insights_name}-${random_string.random.result}"
 }
 
-#Machine Learning Workspace
+#Spoke Machine Learning Workspace
 module "machine_learning_workspace" {
   source = "../../modules/machine_learning_workspace"
   mlw_name                = "${var.mlw_name}-${random_string.random.result}"
   location                = var.location
-  resource_group_name     = azurerm_resource_group.id_shared_region1.name
+  resource_group_name     = azurerm_resource_group.spoke_shared_rg.name
   application_insights_id = module.app_insights.app_insights_id
-  key_vault_id            = module.hub_keyvault.kv_id
+  key_vault_id            = module.keyvault.kv_id
   storage_account_id      = module.storage_account.storage_account_id
   container_registry_id   = module.acr.acr_id
-  subnet_id               = module.id_spk_region1_training_subnet.subnet_id
+  subnet_id               = module.spoke_vnet_training_subnet.subnet_id
   machine_learning_workspace_notebooks_zone_id  = module.private_dns.machine_learning_workspace_notebooks_zone_id
   machine_learning_workspace_api_zone_id        = module.private_dns.machine_learning_workspace_api_zone_id
 }

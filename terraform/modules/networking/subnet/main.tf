@@ -17,7 +17,7 @@ data "azurerm_virtual_network" "vnet_name" {
 }
 
 
-resource "azurerm_route_table" "spoke_rt" {
+resource "azurerm_route_table" "rt" {
   
   name = "rt-${azurerm_subnet.vnet.name}"
 
@@ -40,6 +40,6 @@ resource "azurerm_route_table" "spoke_rt" {
 
 resource "azurerm_subnet_route_table_association" "route_assoc" {
   subnet_id      = azurerm_subnet.vnet.id
-  route_table_id = azurerm_route_table.spoke_rt.id
+  route_table_id = azurerm_route_table.rt.id
   
 }
