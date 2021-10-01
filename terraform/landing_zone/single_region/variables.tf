@@ -44,7 +44,7 @@ variable "azurebastion_name" {
 variable "azurebastion_addr_prefix" {
     type        = string 
     description = "Azure Bastion Address Prefix"
-    default     = "10.1.250.0/24"
+    default     = "10.1.3.0/24"
 }
 
 # Azure Firewall
@@ -56,7 +56,7 @@ variable "azurefw_name" {
 variable "azurefw_addr_prefix" {
     type        = string 
     description = "Azure Firewall VNET prefix"
-    default     = "10.1.254.0/24"
+    default     = "10.1.4.0/24"
 }
 
 

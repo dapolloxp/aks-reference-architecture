@@ -175,7 +175,7 @@ module "bastion" {
   location                  = azurerm_resource_group.hub_rg.location
   azurebastion_name         = var.azurebastion_name
   azurebastion_vnet_name    = module.hub_vnet.vnet_name
-  azurebastion_addr_prefix  = "10.1.250.0/24"
+  azurebastion_addr_prefix  = var.azurebastion_addr_prefix
 }
 
 #Hub Azure Firewall
@@ -273,7 +273,8 @@ module "machine_learning_workspace" {
   key_vault_id            = module.keyvault.kv_id
   storage_account_id      = module.storage_account.storage_account_id
   container_registry_id   = module.acr.acr_id
-  subnet_id               = module.spoke_vnet_training_subnet.subnet_id
+  snet_training_id        = module.spoke_vnet_training_subnet.subnet_id
+  snet_aks_id             = module.spoke_vnet_aks_subnet.subnet_id
   machine_learning_workspace_notebooks_zone_id  = module.private_dns.machine_learning_workspace_notebooks_zone_id
   machine_learning_workspace_api_zone_id        = module.private_dns.machine_learning_workspace_api_zone_id
 }

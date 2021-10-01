@@ -1,4 +1,51 @@
+# Network Security Groups
 
+resource "azurerm_network_security_group" "nsg-training" {
+  name                = "nsg-training"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  security_rule {
+    name                       = "BatchNodeManagement"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "29876-29877"
+    source_address_prefix      = "BatchNodeManagement"
+    destination_address_prefix = "*"
+  }
+  security_rule {
+    name                       = "AzureMachineLearning"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "44224"
+    source_address_prefix      = "AzureMachineLearning"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "nsg-training-link" {
+  subnet_id                 = var.snet_training_id
+  network_security_group_id = azurerm_network_security_group.nsg-training.id
+}
+
+resource "azurerm_network_security_group" "nsg-aks" {
+  name                = "nsg-aks"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+
+}
+
+resource "azurerm_subnet_network_security_group_association" "nsg-aks-link" {
+  subnet_id                 = var.snet_aks_id
+  network_security_group_id = azurerm_network_security_group.nsg-aks.id
+}
 
 # Machine Learning workspace
 resource "azurerm_machine_learning_workspace" "machine_learning_workspace" {
@@ -19,7 +66,7 @@ resource "azurerm_private_endpoint" "machine-learning-workspace-endpoint" {
   name                = "mlw-endpoint"
   location            = var.location
   resource_group_name = var.resource_group_name
-  subnet_id           = var.subnet_id
+  subnet_id           = var.snet_training_id
 
   private_service_connection {
     name                           = "mlw-private-link-connection"
