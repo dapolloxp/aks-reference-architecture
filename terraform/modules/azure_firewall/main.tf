@@ -135,7 +135,17 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         port = 443
       }
       source_ip_groups = [var.region1_aks_spk_ip_g_id]      
-      destination_fqdns = ["github.com"]
+      destination_fqdns = ["github.com", "kedacore.github.io"]
+    }
+
+    rule {
+      name = "keda_rules"
+      protocols {
+        type = "Https"
+        port = 443
+      }
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      destination_fqdns = ["kedacore.github.io"]
     }
 
     rule {
@@ -181,7 +191,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
       name                  = "aks_global_network_rule"
       protocols             = ["TCP"]
       source_ip_groups = [var.region1_aks_spk_ip_g_id]      
-      destination_fqdns = ["AzureCloud"]
+      destination_addresses = ["AzureCloud"]
       destination_ports     = ["443", "9000"]
     }
 

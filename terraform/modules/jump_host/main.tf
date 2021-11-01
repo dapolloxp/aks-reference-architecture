@@ -84,16 +84,22 @@ resource "azurerm_linux_virtual_machine" "jump_host" {
   }
 }
 
+locals {
+  # Ids for multiple sets of EC2 instances, merged together
+  kv_name = element(split("/", var.key_vault_id),length(split("/", var.key_vault_id))-1)
+}
+// element(split("/", key_vault_id),length(split("/", key_vault_id))-1)
 resource "azurerm_virtual_machine_extension" "Installdependancies" {
     name                        = "${var.jump_host_name}_vm_extension"
     virtual_machine_id          = azurerm_linux_virtual_machine.jump_host.id
     publisher                   = "Microsoft.Azure.Extensions"
     type                        = "CustomScript"
     type_handler_version        = "2.0"
-
+    # "script":"${filebase64("${path.module}/tools_install.sh '${local.kv_name}'")}"
     settings = <<SETTINGS
     {
-        "script":"${filebase64("${path.module}/tools_install.sh")}"
+        
+        '{"fileUris": ["https://raw.githubusercontent.com/me/project/hello.sh"],"commandToExecute": "./hello.sh"}'
     }
     SETTINGS
     depends_on = [

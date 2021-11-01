@@ -31,7 +31,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "aks_spoke_link" {
 }
 /*
 provider "helm" {
-  version = "1.3.2"
+  #version = "1.3.2"
   kubernetes {
     host = azurerm_kubernetes_cluster.aks_c.kube_config[0].host
 
@@ -124,6 +124,8 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
     depends_on = [
     azurerm_role_assignment.aks_master_role_assignment,
   ]
+
+  
 }
 data "azurerm_subscription" "current_sub" {
 }
@@ -133,17 +135,42 @@ resource "azurerm_role_assignment" "rbac_assignment" {
   principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
 }
 
+resource "null_resource" "keda_install" {
+  provisioner "local-exec" {
+  when = create
+  command = <<EOF
+      
+    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add kedacore https://kedacore.github.io/charts";
+    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo update"
+    
+  EOF
+}
+}
+
+resource "azurerm_role_assignment" "rbac_assignment_sub_network_c" {
+  scope                = data.azurerm_subscription.current_sub.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "rbac_assignment_sub_managed_mi_c" {
+  scope                = data.azurerm_subscription.current_sub.id
+  role_definition_name = "Managed Identity Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
+}
+
+
+
 /*
+
 resource "helm_release" "aad-pod-identity" {
   name  = "aad-pod-identity"
   chart = "aad-pod-identity/aad-pod-identity"
   namespace = "kube-system"
   
-}
-
-
-
-resource "azurerm_role_assignment" "rbac_assignment" {
+}*/
+/*
+resource "azurerm_role_assignment" "rbac_assignment_sub" {
   scope                = data.azurerm_subscription.current_sub.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.mi_identity.principal_id
@@ -161,7 +188,7 @@ output "aks_id" {
 
 output "kube_config" {
   value = azurerm_kubernetes_cluster.aks_c.kube_config_raw
-}*/
+}/*
 
 
  /*
