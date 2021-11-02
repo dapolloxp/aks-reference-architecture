@@ -441,27 +441,12 @@ module "jump_host" {
     key_vault_id                         = module.hub_keyvault.kv_key_zone_id
     kv_rg                                = azurerm_resource_group.id_shared_region1.name
     depends_on = [
-      azurerm_resource_group.id_shared_region1,
-      module.azure_firewall_region1
+      azurerm_resource_group.id_shared_region1
     ]
 }
 
 
-/*
-module "jump_host2" { 
-    #providers = {azurerm = azurerm.connectivity}
-    source                              = "../../modules/jump_host"
-    resource_group_name                 = azurerm_resource_group.hub_region2.name
-    location                            = azurerm_resource_group.hub_region2.location
-    jump_host_name                       = var.jump_host_name
-    jump_host_vnet_name                  = module.hub_region2.vnet_name
-    jump_host_addr_prefix                = var.jump_host_addr_prefix2
-    jump_host_private_ip_addr            = var.jump_host_private_ip_addr2
-    jump_host_vm_size                    = var.jump_host_vm_size
-    jump_host_admin_username             = var.jump_host_admin_username
-    jump_host_password                   = var.jump_host_password
-}
-*/
+
 resource "azurerm_resource_group" "id_shared_region1" {
   #provider = azurerm.identity
   name     = "shared-svc-spk-${var.region1_loc}-rg"

@@ -139,10 +139,8 @@ resource "null_resource" "keda_install" {
   provisioner "local-exec" {
   when = create
   command = <<EOF
-      
-    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add kedacore https://kedacore.github.io/charts";
-    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo update"
-    
+    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts && helm repo update && helm install aad-pod-identity aad-pod-identity/aad-pod-identity;"
+    az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add kedacore https://kedacore.github.io/charts && helm repo update && kubectl create namespace keda && helm install keda kedacore/keda --namespace keda;"
   EOF
 }
 }

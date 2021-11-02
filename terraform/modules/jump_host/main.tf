@@ -96,10 +96,15 @@ resource "azurerm_virtual_machine_extension" "Installdependancies" {
     type                        = "CustomScript"
     type_handler_version        = "2.0"
     # "script":"${filebase64("${path.module}/tools_install.sh '${local.kv_name}'")}"
+    protected_settings = <<PROTECTED_SETTINGS
+    {
+      "commandToExecute": "./tools_install.sh ${local.kv_name}"
+    }
+    PROTECTED_SETTINGS
     settings = <<SETTINGS
     {
         
-        '{"fileUris": ["https://raw.githubusercontent.com/me/project/hello.sh"],"commandToExecute": "./hello.sh"}'
+        "fileUris": ["https://raw.githubusercontent.com/dapolloxp/aks-reference-architecture/main/terraform/modules/jump_host/tools_install.sh"]  
     }
     SETTINGS
     depends_on = [
