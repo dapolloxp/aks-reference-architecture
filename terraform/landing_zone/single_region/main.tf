@@ -60,13 +60,6 @@ resource "azurerm_resource_group" "hub_region1" {
   location = var.region1_loc
   tags     = var.tags
 }
-/*
-resource "azurerm_resource_group" "hub_region2" {
-  #provider = azurerm.connectivity
-  name     = "net-core-hub-${var.region2_loc}-rg"
-  location = var.region2_loc
-  tags     = var.tags
-}*/
 
 module "hub_region1" {
   
@@ -111,48 +104,7 @@ resource "azurerm_ip_group" "ip_g_region1_pe_spoke" {
   resource_group_name = azurerm_resource_group.hub_region1.name
   cidrs = ["10.4.0.0/16"]
 }
-/*
-resource "azurerm_ip_group" "ip_g_region2" {
-  name                = "region2-ipgroup"
-  location            = azurerm_resource_group.hub_region2.location
-  resource_group_name = azurerm_resource_group.hub_region2.name
 
-  cidrs = ["10.2.0.0/16", "10.10.0.0/16"]
-
-}*/
-/*
-module "hub_region2" {
-  
-  source = "../../modules/networking/vnet"
-  resource_group_name = azurerm_resource_group.hub_region2.name
-  location            = azurerm_resource_group.hub_region2.location
-  vnet_name             = "vnet-hub-${var.region2_loc}"
-  address_space         = "10.2.0.0/16"
-  #default_subnet_prefixes = ["10.2.1.0/24"]
-  dns_servers = ["168.63.129.16"]
-}
-
-module "hub_region2_default_subnet"{
-  
-  source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.hub_region2.name
-  vnet_name = module.hub_region2.vnet_name
-  subnet_name = "default-subnet"
-  subnet_prefixes = ["10.2.1.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
-}
-
-# Peering between hub1 and hub2
-module "peering_hubs" {
-  #providers = {azurerm = azurerm.connectivity}
-  source = "../../modules/networking/peering_both"
-  resource_group_nameA = azurerm_resource_group.hub_region1.name
-  resource_group_nameB = azurerm_resource_group.hub_region2.name
-  netA_name            = module.hub_region1.vnet_name
-  netA_id              = module.hub_region1.vnet_id
-  netB_name            = module.hub_region2.vnet_name
-  netB_id              = module.hub_region2.vnet_id
-}*/
 
 resource "azurerm_resource_group" "id_spk_region1" {
   #provider = azurerm.identity
@@ -263,72 +215,6 @@ module "peering_id_spk_Region1_2" {
   depends_on = [module.peering_aks_spk_Region1_1]
 }
 
-/*
-resource "azurerm_resource_group" "id_spk_region2" {
-  #provider = azurerm.identity
-  name     = "net-aks-spk-${var.region2_loc}-rg"
-  location = var.region2_loc
-  tags     = var.tags
-}
-*/
-/*
-# Create idenity spoke for region2
-module "id_spk_region2" {
-  #providers = {azurerm = azurerm.identity}
-  source = "../../modules/networking/vnet"
-  resource_group_name = azurerm_resource_group.id_spk_region2.name
-  location            = azurerm_resource_group.id_spk_region2.location
-  vnet_name             = "vnet-aks-spk-${var.region2_loc}"
-  address_space         = "10.10.0.0/16"
-  # default_subnet_prefixes = ["10.4.1.0/24"]
-  dns_servers = ["168.63.129.16"]
-}
-*/
-/*
-module "id_spk_region2_default_subnet"{
-  
-  source = "../../modules/networking/subnet"
-  resource_group_name = azurerm_resource_group.id_spk_region2.name
-  vnet_name = module.id_spk_region2.vnet_name
-  subnet_name = "aks-subnet"
-  subnet_prefixes = ["10.10.1.0/24"]
-  azure_fw_ip = module.azure_firewall_region1.ip
-}*/
-
-##Add Additional subnets Needed
-#module "id_spk_region2_shared_subnet"{
-#
-#}
-/*
-# Peering between hub2 and id_spk2
-module "peering_id_spk_Region2_1" {
-  #providers = {azurerm = azurerm.connectivity}
-  source = "../../modules/networking/peering_direction1"
-  resource_group_nameA = azurerm_resource_group.hub_region2.name
-  resource_group_nameB = azurerm_resource_group.id_spk_region2.name
-  netA_name            = module.hub_region2.vnet_name
-  netA_id              = module.hub_region2.vnet_id
-  netB_name            = module.id_spk_region2.vnet_name
-  netB_id              = module.id_spk_region2.vnet_id
-}
-*/
-/*
-# Peering between hub2 and id_spk2
-module "peering_id_spk_Region2_2" {
-  #providers = {azurerm = azurerm.identity}
-  source = "../../modules/networking/peering_direction2"
-
-  resource_group_nameA = azurerm_resource_group.hub_region2.name
-  resource_group_nameB = azurerm_resource_group.id_spk_region2.name
-  netA_name            = module.hub_region2.vnet_name
-  netA_id              = module.hub_region2.vnet_id
-  netB_name            = module.id_spk_region2.vnet_name
-  netB_id              = module.id_spk_region2.vnet_id
-
-  depends_on = [module.peering_id_spk_Region2_1]
-}*/
-
-
 module "aks" {
   source                          = "../../modules/aks"
   resource_group_name             = azurerm_resource_group.aks_rg.name
@@ -364,7 +250,19 @@ module "private_dns" {
   location                        = var.location
   hub_virtual_network_id          = module.hub_region1.vnet_id
 }
+module "service_bus" {
+  source = "../../modules/service_bus"
+  resource_group_name             = azurerm_resource_group.aks_rg.name
+  location                        = var.location
+  sb-name                            = var.servicebus-name
+}
 
+module "keda_app" {
+  source = "../../modules/keda"
+  resource_group_name           = module.aks.node_resource_group
+  location                        = var.location
+  sb_id                         = module.service_bus.service_bus_id
+}
 
 resource "azurerm_route_table" "default_aks_route" {
   name                          = "default_aks_route"
@@ -382,11 +280,8 @@ resource "azurerm_route_table" "default_aks_route" {
 
 
 
-#resource "azurerm_network_ddos_protection_plan" "hub1" {
-#  name                = "${var.corp_prefix}-protection-plan"
-#  location            = azurerm_resource_group.hub_region1.location
-#  resource_group_name = azurerm_resource_group.hub_region1.name
-#}
+
+
 
 # Bastion Host
 
@@ -400,18 +295,7 @@ module "bastion_region1" {
   azurebastion_addr_prefix = "10.1.250.0/24"
 }
 
-# Azure Firewall 
-/*
-module "azure_firewall_region2" { 
-    
-    source                      = "../../modules/azure_firewall"
-    resource_group_name         = azurerm_resource_group.hub_region2.name
-    location                    = azurerm_resource_group.hub_region2.location
-    azurefw_name                = var.azurefw_name_r2
-    azurefw_vnet_name           = module.hub_region2.vnet_name
-    azurefw_addr_prefix         = var.azurefw_addr_prefix_r2
-    sc_law_id                   = module.log_analytics.log_analytics_id
-}*/
+
 
 module "azure_firewall_region1" { 
     source                      = "../../modules/azure_firewall"
@@ -453,13 +337,7 @@ resource "azurerm_resource_group" "id_shared_region1" {
   location = var.region1_loc
   tags     = var.tags
 }
-/*
-resource "azurerm_resource_group" "id_shared_region2" {
-  #provider = azurerm.identity
-  name     = "shared-svc-spk-${var.region2_loc}-rg"
-  location = var.region2_loc
-  tags     = var.tags
-}*/
+
 
 #Add Additional subnets Needed
 module "id_spk_region1_shared_subnet"{

@@ -25,12 +25,21 @@ sudo apt-get update -y
 sudo apt-get install helm -y
 
 
+# Install .net core
+
+wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
+
+sudo apt-get update;  sudo apt-get install -y apt-transport-https &&   sudo apt-get update &&   sudo apt-get install -y dotnet-sdk-3.1
+
+sudo apt-get update; sudo apt-get install -y apt-transport-https && sudo apt-get update && sudo apt-get install -y aspnetcore-runtime-3.1
+
+
 # Generate SSH key
 
 ssh-keygen -m PEM -t rsa -b 4096 -C "azureuser@myserver" -f /root/.ssh/id_rsa -N ""
 
 
 az login --identity
-echo $1
-#kv=$(az keyvault list --query '[].name' --output tsv)
 az keyvault secret set --name test --vault-name $1 --file ~/.ssh/id_rsa.pub

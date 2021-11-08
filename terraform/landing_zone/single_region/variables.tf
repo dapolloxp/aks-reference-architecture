@@ -10,6 +10,11 @@ variable "svc_resource_group_name" {
     default     = "svc-core-prod-rg"
 }
 
+variable "servicebus-name" {
+  type = string
+  default = "dapolinasb10"
+}
+
 variable "location" {
     type = string
     default = "eastus2"
