@@ -10,7 +10,7 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: order-scaler
-  namespace: {{ .Values.ServiceBus.queue }}
+  namespace: {{ .Values.ProcessorManagedIdentity.namespace }}
 spec:
   scaleTargetRef:
     name: order-processor

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-processor
+  namespace: {{ .Values.ProcessorManagedIdentity.namespace }}
   labels:
     app: order-processor
 spec:
