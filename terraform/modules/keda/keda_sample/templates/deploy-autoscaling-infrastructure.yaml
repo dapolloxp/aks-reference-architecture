@@ -1,0 +1,18 @@
+apiVersion: aadpodidentity.k8s.io/v1
+kind: AzureIdentity
+metadata:
+  name: {{ .Values.ScalerManagedIdentity.name }}
+  namespace: {{ .Values.ScalerManagedIdentity.namespace}}
+spec:
+  type: 0 # 0 means User-assigned MSI
+  resourceID: {{ .Values.ScalerManagedIdentity.resourceID }}
+  clientID: {{ .Values.ScalerManagedIdentity.clientID }}
+---
+apiVersion: aadpodidentity.k8s.io/v1
+kind: AzureIdentityBinding
+metadata:
+  #name: <autoscaler-identity-name>-binding
+  name: {{ .Values.ScalerManagedIdentity.Name }}-binding
+spec:
+  azureIdentity: {{ .Values.ScalerManagedIdentity.name }}
+  selector: app-autoscaler

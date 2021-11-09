@@ -1,0 +1,15 @@
+ScalerManagedIdentity:
+  name: keda-identity
+  resourceID: /subscriptions/90376dc6-e4a0-49c3-930d-38ee8e2bafa4/resourcegroups/MC_aks-core-prod-eastus2-rg_test-cluster_eastus2/providers/Microsoft.ManagedIdentity/userAssignedIdentities/keda-identity
+  clientID: 57d635aa-c9f2-41f1-ae2d-6fbea97873a8
+  namespace: keda
+
+ServiceBus:
+  hostName: dapolinasb10
+  queue: orders
+
+ProcessorManagedIdentity:
+  name: sb-processor-identity  
+  resourceID: "/subscriptions/90376dc6-e4a0-49c3-930d-38ee8e2bafa4/resourceGroups/MC_aks-core-prod-eastus2-rg_test-cluster_eastus2/providers/Microsoft.ManagedIdentity/userAssignedIdentities/sb-processor-identity"
+  clientID: 45f54eb7-82b1-4eb2-9c6b-f7475a4b7c6f
+  namespace: keda-dotnet-sample

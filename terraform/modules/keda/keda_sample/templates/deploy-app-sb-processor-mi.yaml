@@ -1,0 +1,16 @@
+apiVersion: aadpodidentity.k8s.io/v1
+kind: AzureIdentity
+metadata:
+  name: {{ .Values.ProcessorManagedIdentity.name}}
+spec:
+  type: 0 # 0 means User-assigned MSI
+  resourceID: 
+  clientID:  {{ .Values.ProcessorManagedIdentity.clientID}}
+---
+apiVersion: aadpodidentity.k8s.io/v1
+kind: AzureIdentityBinding
+metadata:
+  name: sb-processor-identity-binding
+spec:
+  azureIdentity: {{ .Values.ProcessorManagedIdentity.name}}
+  selector: order-processor

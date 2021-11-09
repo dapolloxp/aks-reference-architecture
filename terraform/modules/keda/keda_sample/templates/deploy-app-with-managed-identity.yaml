@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-processor
+  labels:
+    app: order-processor
+spec:
+  selector:
+    matchLabels:
+      app: order-processor
+  template:
+    metadata:
+      labels:
+        app: order-processor
+        aadpodidbinding: order-processor
+    spec:
+      containers:
+      - name: order-processor
+        image: ghcr.io/kedacore/sample-dotnet-worker-servicebus-queue:latest
+        env:
+        - name: KEDA_SERVICEBUS_AUTH_MODE
+          value: ManagedIdentity
+        - name: KEDA_SERVICEBUS_HOST_NAME
+          value: {{ .Values.ServiceBus.hostName }}.servicebus.windows.net
+        - name: KEDA_SERVICEBUS_QUEUE_NAME
+          value: {{ .Values.ServiceBus.queue }}
+        - name: KEDA_SERVICEBUS_IDENTITY_USERASSIGNEDID
+          value: {{ .Values.ProcessorManagedIdentity.clientID}}
