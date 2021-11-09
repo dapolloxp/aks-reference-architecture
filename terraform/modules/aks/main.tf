@@ -158,7 +158,18 @@ resource "azurerm_role_assignment" "rbac_assignment_sub_managed_mi_c" {
   principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
 }
 
+resource "azurerm_role_assignment" "rbac_assignment_sub_managed_mi_reader" {
+  scope                = data.azurerm_subscription.current_sub.id
+  role_definition_name = "Reader"
+  principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
+}
 
+
+resource "azurerm_role_assignment" "rbac_assignment_sub_managed_vm_c" {
+  scope                = data.azurerm_subscription.current_sub.id
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks_c.kubelet_identity[0].object_id
+}
 
 /*
 
