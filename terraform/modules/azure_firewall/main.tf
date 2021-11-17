@@ -1,18 +1,18 @@
 # Azure Firewall TF Module
 resource "azurerm_subnet" "azure_firewall" {
-    name                        = "AzureFirewallSubnet"
-    resource_group_name         = var.resource_group_name
-    virtual_network_name        = var.azurefw_vnet_name
-    address_prefixes            = [var.azurefw_addr_prefix]
-    
-} 
+  name                 = "AzureFirewallSubnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = var.azurefw_vnet_name
+  address_prefixes     = [var.azurefw_addr_prefix]
+
+}
 
 resource "azurerm_public_ip" "azure_firewall" {
-    name                        = "azure-firewall-ip"
-    location                    = var.location
-    resource_group_name         = var.resource_group_name
-    allocation_method           = "Static"
-    sku                         = "Standard"
+  name                = "azure-firewall-ip"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_firewall_policy" "base_policy" {
@@ -25,29 +25,29 @@ resource "azurerm_firewall_policy" "base_policy" {
 }
 
 
-resource "azurerm_firewall" "azure_firewall_instance" { 
-    name                        = var.azurefw_name
-    location                    = var.location
-    resource_group_name         = var.resource_group_name
-    firewall_policy_id          = azurerm_firewall_policy.base_policy.id   
+resource "azurerm_firewall" "azure_firewall_instance" {
+  name                = var.azurefw_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  firewall_policy_id  = azurerm_firewall_policy.base_policy.id
 
-    ip_configuration {
-        name                    = "configuration"
-        subnet_id               = azurerm_subnet.azure_firewall.id 
-        public_ip_address_id    = azurerm_public_ip.azure_firewall.id
-    }
-
-    timeouts {
-      create = "60m"
-      delete = "2h"
+  ip_configuration {
+    name                 = "configuration"
+    subnet_id            = azurerm_subnet.azure_firewall.id
+    public_ip_address_id = azurerm_public_ip.azure_firewall.id
   }
-  depends_on = [ azurerm_public_ip.azure_firewall ]
+
+  timeouts {
+    create = "60m"
+    delete = "2h"
+  }
+  depends_on = [azurerm_public_ip.azure_firewall]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
-  name                        = "monitoring"
-  target_resource_id          = azurerm_firewall.azure_firewall_instance.id
-  log_analytics_workspace_id  = var.sc_law_id
+  name                       = "monitoring"
+  target_resource_id         = azurerm_firewall.azure_firewall_instance.id
+  log_analytics_workspace_id = var.sc_law_id
 
   log {
     category = "AzureFirewallApplicationRule"
@@ -73,7 +73,7 @@ resource "azurerm_monitor_diagnostic_setting" "azfw_diag" {
       enabled = false
     }
   }
-  
+
 
   metric {
     category = "AllMetrics"
@@ -100,10 +100,10 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups      = [var.region1_aks_spk_ip_g_id]
       destination_fqdn_tags = ["AzureKubernetesService"]
     }
-    
+
 
     rule {
       name = "ubuntu_libraries"
@@ -111,8 +111,8 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
-      destination_fqdns = ["api.snapcraft.io","motd.ubuntu.com",]
+      source_ip_groups  = [var.region1_aks_spk_ip_g_id]
+      destination_fqdns = ["api.snapcraft.io", "motd.ubuntu.com", ]
     }
 
     rule {
@@ -121,11 +121,11 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Http"
         port = 80
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["crl.microsoft.com",
-                          "mscrl.microsoft.com",  
-                          "crl3.digicert.com",
-                          "ocsp.digicert.com"]
+        "mscrl.microsoft.com",
+        "crl3.digicert.com",
+      "ocsp.digicert.com"]
     }
 
     rule {
@@ -134,7 +134,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups  = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["github.com", "raw.githubusercontent.com"]
     }
 
@@ -144,7 +144,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups  = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["kedacore.github.io", "ghcr.io", "pkg-containers.githubusercontent.com"]
     }
 
@@ -154,7 +154,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups  = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["*.prod.microsoftmetrics.com"]
     }
 
@@ -164,11 +164,11 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["acs-mirror.azureedge.net",
-                           "*.docker.io",
-                           "production.cloudflare.docker.com",
-                          "*.azurecr.io"]
+        "*.docker.io",
+        "production.cloudflare.docker.com",
+      "*.azurecr.io"]
     }
 
     rule {
@@ -177,7 +177,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
         type = "Https"
         port = 443
       }
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups  = [var.region1_aks_spk_ip_g_id]
       destination_fqdns = ["login.microsoftonline.com"]
     }
   }
@@ -190,7 +190,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
     rule {
       name                  = "aks_global_network_rule"
       protocols             = ["TCP"]
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups      = [var.region1_aks_spk_ip_g_id]
       destination_addresses = ["AzureCloud"]
       destination_ports     = ["443", "9000"]
     }
@@ -198,7 +198,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "aks_rule_collection" {
     rule {
       name                  = "aks_ntp_network_rule"
       protocols             = ["UDP"]
-      source_ip_groups = [var.region1_aks_spk_ip_g_id]      
+      source_ip_groups      = [var.region1_aks_spk_ip_g_id]
       destination_addresses = ["*"]
       destination_ports     = ["123"]
     }

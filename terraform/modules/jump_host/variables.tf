@@ -1,14 +1,14 @@
 variable "resource_group_name" {}
 variable "location" {}
 variable "tags" {
-    type        = map 
-    default     = { 
-        Environment = "development"
-    }
+  type = map(any)
+  default = {
+    Environment = "development"
+  }
 }
 variable "kv_rg" {
-    sensitive   = true
-    type        = string 
+  sensitive = true
+  type      = string
 }
 
 variable "jump_host_name" {}

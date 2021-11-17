@@ -45,7 +45,7 @@ provider "helm" {
 
 data "azurerm_key_vault_secret" "kv_secret" {
   name         = "test"
-  key_vault_id = var.key_vault_id 
+  key_vault_id = var.key_vault_id
 }
 
 resource "azurerm_kubernetes_cluster" "aks_c" {
@@ -53,36 +53,36 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
   location            = var.location
   resource_group_name = var.resource_group_name
   dns_prefix          = var.aks_dns_prefix
- # node_resource_group = "${var.prefix}-nodes-rg"
-  
-  kubernetes_version  = var.kubernetes_version
-  identity            {
-    type = "UserAssigned"
+  # node_resource_group = "${var.prefix}-nodes-rg"
+
+  kubernetes_version = var.kubernetes_version
+  identity {
+    type                      = "UserAssigned"
     user_assigned_identity_id = azurerm_user_assigned_identity.aks_master_identity.id
   }
-  
+
   linux_profile {
     admin_username = "azureuser"
     ssh_key {
       key_data = data.azurerm_key_vault_secret.kv_secret.value
     }
-    
+
   }
 
   auto_scaler_profile {
-    expander = "most-pods"
-    scan_interval = "60s"
+    expander              = "most-pods"
+    scan_interval         = "60s"
     empty_bulk_delete_max = "100"
   }
-  
+
 
   role_based_access_control {
     enabled = "true"
-    
-  #  azure_active_directory {
-  #    managed = "true"
-  #    admin_group_object_ids = ["80339304-66f8-4289-ab60-f3b6087d6741"]
-  #  }
+
+    #  azure_active_directory {
+    #    managed = "true"
+    #    admin_group_object_ids = ["80339304-66f8-4289-ab60-f3b6087d6741"]
+    #  }
   }
 
   addon_profile {
@@ -90,42 +90,42 @@ resource "azurerm_kubernetes_cluster" "aks_c" {
       enabled = true
     }
     kube_dashboard {
-              enabled = false
+      enabled = false
     }
   }
 
   private_cluster_enabled = true
   private_dns_zone_id     = azurerm_private_dns_zone.aks_dns_zone.id
- 
 
-  
-   
 
-  network_profile  {
-    network_plugin = "azure"
-    service_cidr = var.service_cidr
-    dns_service_ip = var.dns_service_ip
+
+
+
+  network_profile {
+    network_plugin     = "azure"
+    service_cidr       = var.service_cidr
+    dns_service_ip     = var.dns_service_ip
     docker_bridge_cidr = var.docker_bridge_cidr
-    load_balancer_sku = "standard"
-    outbound_type = "userDefinedRouting"
-    
-    
+    load_balancer_sku  = "standard"
+    outbound_type      = "userDefinedRouting"
+
+
   }
-  
+
   default_node_pool {
-    name                  = "defaultpool"
-    vm_size               = var.machine_type
-    node_count            = var.default_node_pool_size
-    vnet_subnet_id        = var.aks_spoke_subnet_id
-    enable_auto_scaling   = true
-    max_count = 10
-    min_count = 1
+    name                = "defaultpool"
+    vm_size             = var.machine_type
+    node_count          = var.default_node_pool_size
+    vnet_subnet_id      = var.aks_spoke_subnet_id
+    enable_auto_scaling = true
+    max_count           = 10
+    min_count           = 1
   }
-    depends_on = [
+  depends_on = [
     azurerm_role_assignment.aks_master_role_assignment,
   ]
 
-  
+
 }
 data "azurerm_subscription" "current_sub" {
 }
@@ -137,13 +137,13 @@ resource "azurerm_role_assignment" "rbac_assignment" {
 
 resource "null_resource" "keda_install" {
   provisioner "local-exec" {
-  when = create
-  command = <<EOF
+    when    = create
+    command = <<EOF
     az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts && helm repo update && helm install aad-pod-identity aad-pod-identity/aad-pod-identity;"
     az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "helm repo add kedacore https://kedacore.github.io/charts && helm repo update && kubectl create namespace keda && helm install keda kedacore/keda --set podIdentity.activeDirectory.identity=app-autoscaler --namespace keda;"
     az aks command invoke -g ${var.resource_group_name} -n ${azurerm_kubernetes_cluster.aks_c.name} -c "kubectl create namespace keda-dotnet-sample;"
   EOF
-}
+  }
 }
 
 resource "azurerm_role_assignment" "rbac_assignment_sub_network_c" {

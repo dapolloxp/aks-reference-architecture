@@ -6,27 +6,27 @@ resource "azurerm_private_dns_zone" "spring_cloud_zone" {
 # RBAC Access for Spoke VNET
 
 data "azuread_service_principal" "resource_provider" {
-   display_name = "Azure Spring Cloud Resource Provider"
- }
+  display_name = "Azure Spring Cloud Resource Provider"
+}
 
 resource "azurerm_role_assignment" "scowner" {
-  scope                 = var.spoke_virtual_network_id
-  role_definition_name  = "Owner"
-  principal_id          = data.azuread_service_principal.resource_provider.object_id
+  scope                = var.spoke_virtual_network_id
+  role_definition_name = "Owner"
+  principal_id         = data.azuread_service_principal.resource_provider.object_id
 }
 
 resource "azurerm_role_assignment" "sc_apps_route_owner" {
 
-  scope                   =  var.sc_default_apps_route
-  role_definition_name    = "Owner"
-  principal_id            = data.azuread_service_principal.resource_provider.object_id
+  scope                = var.sc_default_apps_route
+  role_definition_name = "Owner"
+  principal_id         = data.azuread_service_principal.resource_provider.object_id
 }
 
 resource "azurerm_role_assignment" "sc_runtime_route_owner" {
 
-  scope                   =  var.sc_default_runtime_route
-  role_definition_name    = "Owner"
-  principal_id            = data.azuread_service_principal.resource_provider.object_id
+  scope                = var.sc_default_runtime_route
+  role_definition_name = "Owner"
+  principal_id         = data.azuread_service_principal.resource_provider.object_id
 }
 
 resource "azurerm_application_insights" "sc_app_insights" {
@@ -39,9 +39,9 @@ resource "azurerm_application_insights" "sc_app_insights" {
 
 
 resource "azurerm_monitor_diagnostic_setting" "sc_diag" {
-  name                        = "monitoring"
-  target_resource_id          = azurerm_spring_cloud_service.sc.id
-  log_analytics_workspace_id  = var.sc_law_id
+  name                       = "monitoring"
+  target_resource_id         = azurerm_spring_cloud_service.sc.id
+  log_analytics_workspace_id = var.sc_law_id
 
   log {
     category = "ApplicationConsole"
@@ -62,21 +62,21 @@ resource "azurerm_monitor_diagnostic_setting" "sc_diag" {
 }
 
 resource "azurerm_spring_cloud_service" "sc" {
-  name                = var.sc_service_name 
+  name                = var.sc_service_name
   resource_group_name = var.resource_group_name
   location            = var.location
-  
+
   network {
-    app_subnet_id                               = var.app_subnet_id
-    service_runtime_subnet_id                   = var.service_runtime_subnet_id
-    cidr_ranges                                 = var.sc_cidr
-    app_network_resource_group                  = "${var.sc_service_name}-apps-rg"
-    service_runtime_network_resource_group      = "${var.sc_service_name}-runtime-rg"
+    app_subnet_id                          = var.app_subnet_id
+    service_runtime_subnet_id              = var.service_runtime_subnet_id
+    cidr_ranges                            = var.sc_cidr
+    app_network_resource_group             = "${var.sc_service_name}-apps-rg"
+    service_runtime_network_resource_group = "${var.sc_service_name}-runtime-rg"
   }
-  
+
   timeouts {
-      create = "60m"
-      delete = "2h"
+    create = "60m"
+    delete = "2h"
   }
 
   trace {
@@ -103,7 +103,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "spoke-link" {
 data "azurerm_lb" "svc_load_balancer" {
   name                = var.internal_lb_svc_load_balancer_name
   resource_group_name = "${var.sc_service_name}-runtime-rg"
-  depends_on = [azurerm_spring_cloud_service.sc]
+  depends_on          = [azurerm_spring_cloud_service.sc]
 }
 
 resource "azurerm_private_dns_a_record" "a_record" {

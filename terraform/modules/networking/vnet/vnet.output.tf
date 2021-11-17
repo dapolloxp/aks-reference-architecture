@@ -1,18 +1,18 @@
 
 output "vnet_name" {
-    value = azurerm_virtual_network.vnet.name
+  value = azurerm_virtual_network.vnet.name
 }
 
 output "vnet_id" {
-    value = azurerm_virtual_network.vnet.id
+  value = azurerm_virtual_network.vnet.id
 }
 
 output "vnet_address_space" {
-    value = azurerm_virtual_network.vnet.address_space
+  value = azurerm_virtual_network.vnet.address_space
 }
 
 output "vnet_subnets" {
-    value = azurerm_virtual_network.vnet.subnet
+  value = azurerm_virtual_network.vnet.subnet
 }
 /*
 output "default_subnet_id" {

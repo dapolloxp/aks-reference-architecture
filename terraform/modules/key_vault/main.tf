@@ -12,21 +12,21 @@ resource "azurerm_key_vault" "vault" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard"
 
-  purge_protection_enabled   = false
-  soft_delete_retention_days = 7
+  purge_protection_enabled        = false
+  soft_delete_retention_days      = 7
   enabled_for_template_deployment = true
-  enabled_for_deployment = true
-  
+  enabled_for_deployment          = true
+
 
   network_acls {
     bypass         = "AzureServices"
     default_action = "Deny"
     ip_rules = [
       "${chomp(data.http.myip.body)}/32"
-  ]
- 
+    ]
+
   }
-  
+
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
@@ -94,7 +94,7 @@ resource "azurerm_key_vault" "vault" {
       "setsas",
       "update"
     ]
-  
+
   }
 
 }
@@ -189,7 +189,7 @@ resource "azurerm_private_endpoint" "keyvault-endpoint" {
   }
 
   private_dns_zone_group {
-    name                          = var.kv_private_zone_name
-    private_dns_zone_ids          = [ var.kv_private_zone_id ]
-  }     
+    name                 = var.kv_private_zone_name
+    private_dns_zone_ids = [var.kv_private_zone_id]
+  }
 }

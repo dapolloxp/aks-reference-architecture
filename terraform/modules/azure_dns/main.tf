@@ -4,7 +4,7 @@ resource "azurerm_private_dns_zone" "keyvault_zone" {
 }
 
 resource "azurerm_private_dns_zone" "servicebus_zone" {
-  name = "privatelink.servicebus.windows.net"
+  name                = "privatelink.servicebus.windows.net"
   resource_group_name = var.resource_group_name
 }
 

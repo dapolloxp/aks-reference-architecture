@@ -2,6 +2,7 @@ apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
   name: trigger-auth-service-bus-orders
+  namespace: {{ .Values.ProcessorManagedIdentity.namespace }}
 spec:
   podIdentity:
     provider: azure
@@ -19,7 +20,7 @@ spec:
   triggers:
   - type: azure-servicebus
     metadata:
-      namespace: default
+      namespace: {{ .Values.ServiceBus.hostName }}
       queueName: {{ .Values.ServiceBus.queue }}
       messageCount: '5'
     authenticationRef:

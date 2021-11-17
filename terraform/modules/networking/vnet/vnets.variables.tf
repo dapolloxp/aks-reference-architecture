@@ -8,7 +8,7 @@ variable "location" {
 
 variable "tags" {
   description = "ARM resource tags to any resource types which accept tags"
-  type = map(string)
+  type        = map(string)
 
   default = {
     application = "networking"
@@ -23,6 +23,6 @@ variable "address_space" {
 
 
 variable "dns_servers" {
-  
+
 }
 

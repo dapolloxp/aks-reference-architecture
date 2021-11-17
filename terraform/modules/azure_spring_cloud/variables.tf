@@ -7,8 +7,8 @@ variable "azure_fw_private_ip" {}
 variable "spoke_virtual_network_id" {}
 variable "sc_service_name" {}
 variable "internal_lb_svc_load_balancer_name" {
-    type    = string
-    default = "kubernetes-internal"
+  type    = string
+  default = "kubernetes-internal"
 }
 variable "private_dns_a_record_a_record_name" {
   type    = string

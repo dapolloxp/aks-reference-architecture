@@ -1,5 +1,5 @@
 resource "azurerm_virtual_network_peering" "direction2" {
-  name                         = "${var.netB_name}-to-${var.netA_name}"
+  name = "${var.netB_name}-to-${var.netA_name}"
   #enable = "${var.direction == "second" ? true : false} | ${var.direction == "both" ? true : false}"
   resource_group_name          = var.resource_group_nameB
   virtual_network_name         = var.netB_name
@@ -8,5 +8,5 @@ resource "azurerm_virtual_network_peering" "direction2" {
   allow_forwarded_traffic      = false
   allow_gateway_transit        = false
   use_remote_gateways          = false
-  
+
 }

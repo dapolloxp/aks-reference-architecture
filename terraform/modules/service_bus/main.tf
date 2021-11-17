@@ -3,7 +3,7 @@ resource "azurerm_servicebus_namespace" "sb_premium" {
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Premium"
-  capacity = 1
+  capacity            = 1
 }
 
 resource "azurerm_servicebus_queue" "orders_queue" {

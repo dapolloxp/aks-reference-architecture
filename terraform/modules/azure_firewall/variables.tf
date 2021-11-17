@@ -5,4 +5,4 @@ variable "azurefw_vnet_name" {}
 variable "azurefw_addr_prefix" {}
 variable "sc_law_id" {}
 
-variable region1_aks_spk_ip_g_id {}
+variable "region1_aks_spk_ip_g_id" {}

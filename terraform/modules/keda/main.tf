@@ -23,3 +23,4 @@ resource "azurerm_role_assignment" "sb_processor_role_assignment" {
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azurerm_user_assigned_identity.sb_processor_identity.principal_id
 }
+
